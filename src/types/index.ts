@@ -41,3 +41,32 @@ export type TopOpeningResponse = {
   oneIn: number          // "one in X games"
   sampleMovesSAN: string // e.g. "1. e4 c5 2. Nf3 d6 3. d4"
 }
+
+export type ActivityBucketPoint = { bucket: number; games: number; pct: number }
+export type ActivityDistributionResponse = {
+  from: YyyyMm
+  to: YyyyMm
+  points: ActivityBucketPoint[]
+}
+
+export type EloHeatmapCell = { whiteBucket: number; blackBucket: number; games: number; pct: number }
+export type EloHeatmapResponse = {
+  from: YyyyMm
+  to: YyyyMm
+  buckets: number[]        // sorted unique buckets (e.g., 800, 1000, ...)
+  cells: EloHeatmapCell[]
+  totalGames: number
+}
+
+export type TopOpeningsItem = {
+  ecoGroup: string
+  displayName: string
+  sampleMovesSAN: string
+  games: number
+  share: number // 0..1
+}
+export type TopOpeningsResponse = {
+  from: YyyyMm
+  to: YyyyMm
+  items: TopOpeningsItem[]
+}

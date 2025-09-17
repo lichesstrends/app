@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getTopOpening, apiRevalidate } from '@/lib/data'
-import { getEcoFamily } from '@/lib/eco'
+import { apiRevalidate, getEloHeatmap } from '@/lib/data'
 import { YyyyMm } from '@/types'
 
 export const revalidate = apiRevalidate
@@ -10,7 +9,6 @@ export async function GET(req: Request) {
   const from = searchParams.get('from') as YyyyMm
   const to = searchParams.get('to') as YyyyMm
   if (!from || !to) return NextResponse.json({ error: 'from & to required' }, { status: 400 })
-
-  const top = await getTopOpening(from, to)
-  return NextResponse.json(top)
+  const data = await getEloHeatmap(from, to)
+  return NextResponse.json(data)
 }

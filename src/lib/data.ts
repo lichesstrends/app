@@ -1,6 +1,14 @@
 import { getPool } from './db'
 import type { RowDataPacket } from 'mysql2'
-import type { YyyyMm, MinMaxMonths, MonthlyGamesPoint, ResultSharePoint } from '@/types'
+import type {
+  YyyyMm,
+  MinMaxMonths,
+  MonthlyGamesPoint,
+  ResultSharePoint,
+  ActivityDistributionResponse,
+  EloHeatmapResponse,
+  TopOpeningsResponse,
+} from '@/types'
 import { isYyyyMm, clampRange, lastNMonthsEndingAt, previousMonth } from './date'
 import { getEcoFamily } from './eco'
 
@@ -126,4 +134,119 @@ export async function getTopOpening(from: YyyyMm, to: YyyyMm) {
     displayName: meta.label,
     sampleMovesSAN: meta.sampleSan
   }
+}
+
+// Game-weighted rating distribution across buckets (white + black appearances)
+export async function getActivityDistribution(from: YyyyMm, to: YyyyMm): Promise<ActivityDistributionResponse> {
+  const { minMonth, maxMonth } = await getMinMaxMonths()
+  const { from: f, to: t } = clampRange(minMonth, maxMonth, from, to)
+  const pool = getPool()
+
+  // Sum games per white bucket and per black bucket separately, then merge
+  const [wrows] = await pool.query<RowDataPacket[]>(
+    `SELECT white_bucket AS bucket, SUM(games) AS g
+     FROM aggregates
+     WHERE month BETWEEN ? AND ?
+     GROUP BY white_bucket
+     ORDER BY bucket`, [f, t]
+  )
+  const [brows] = await pool.query<RowDataPacket[]>(
+    `SELECT black_bucket AS bucket, SUM(games) AS g
+     FROM aggregates
+     WHERE month BETWEEN ? AND ?
+     GROUP BY black_bucket
+     ORDER BY bucket`, [f, t]
+  )
+  const [trow] = await pool.query<RowDataPacket[]>(
+    `SELECT COALESCE(SUM(games),0) AS total
+     FROM aggregates
+     WHERE month BETWEEN ? AND ?`, [f, t]
+  )
+
+  const totalGames = Number(trow[0]?.total ?? 0)
+  const totalAppearances = Math.max(1, totalGames * 2)
+
+  const map = new Map<number, number>()
+  for (const r of wrows) map.set(Number(r.bucket), (map.get(Number(r.bucket)) ?? 0) + Number(r.g ?? 0))
+  for (const r of brows) map.set(Number(r.bucket), (map.get(Number(r.bucket)) ?? 0) + Number(r.g ?? 0))
+
+  const points = Array.from(map.entries())
+    .sort((a, b) => a[0] - b[0])
+    .map(([bucket, games]) => ({
+      bucket,
+      games,
+      pct: games / totalAppearances,
+    }))
+
+  return { from: f, to: t, points }
+}
+
+// Heatmap of game density by (white_bucket, black_bucket)
+export async function getEloHeatmap(from: YyyyMm, to: YyyyMm): Promise<EloHeatmapResponse> {
+  const { minMonth, maxMonth } = await getMinMaxMonths()
+  const { from: f, to: t } = clampRange(minMonth, maxMonth, from, to)
+  const pool = getPool()
+
+  const [cells] = await pool.query<RowDataPacket[]>(
+    `SELECT white_bucket AS wb, black_bucket AS bb, SUM(games) AS g
+     FROM aggregates
+     WHERE month BETWEEN ? AND ?
+     GROUP BY white_bucket, black_bucket`,
+    [f, t]
+  )
+  const [trow] = await pool.query<RowDataPacket[]>(
+    `SELECT COALESCE(SUM(games),0) AS total
+     FROM aggregates
+     WHERE month BETWEEN ? AND ?`, [f, t]
+  )
+  const totalGames = Math.max(1, Number(trow[0]?.total ?? 0))
+
+  const bs = new Set<number>()
+  const outCells = cells.map(r => {
+    const wb = Number(r.wb), bb = Number(r.bb), g = Number(r.g ?? 0)
+    bs.add(wb); bs.add(bb)
+    return { whiteBucket: wb, blackBucket: bb, games: g, pct: g / totalGames }
+  })
+  const buckets = Array.from(bs).sort((a, b) => a - b)
+
+  return { from: f, to: t, buckets, cells: outCells, totalGames }
+}
+
+// Top N openings (families) for a range
+export async function getTopOpenings(from: YyyyMm, to: YyyyMm, limit = 3): Promise<TopOpeningsResponse> {
+  const { minMonth, maxMonth } = await getMinMaxMonths()
+  const { from: f, to: t } = clampRange(minMonth, maxMonth, from, to)
+  const pool = getPool()
+
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT eco_group AS eco, SUM(games) AS g
+     FROM aggregates
+     WHERE month BETWEEN ? AND ?
+     GROUP BY eco_group
+     ORDER BY g DESC
+     LIMIT ?`,
+    [f, t, limit]
+  )
+  const [trow] = await pool.query<RowDataPacket[]>(
+    `SELECT COALESCE(SUM(games),0) AS total
+     FROM aggregates
+     WHERE month BETWEEN ? AND ?`,
+    [f, t]
+  )
+  const total = Math.max(1, Number(trow[0]?.total ?? 0))
+
+  const items = rows.map(r => {
+    const eco = String(r.eco)
+    const meta = getEcoFamily(eco)
+    const games = Number(r.g ?? 0)
+    return {
+      ecoGroup: eco,
+      displayName: meta.label,
+      sampleMovesSAN: meta.sampleSan,
+      games,
+      share: games / total,
+    }
+  })
+
+  return { from: f, to: t, items }
 }
