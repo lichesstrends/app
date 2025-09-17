@@ -6,7 +6,13 @@ type Props = React.PropsWithChildren<ThemeProviderProps>
 
 export function ThemeProvider({ children, ...props }: Props) {
   return (
-    <NextThemesProvider attribute="class" defaultTheme="dark" enableSystem={false} {...props}>
+    <NextThemesProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+      {...props}
+    >
       {children}
     </NextThemesProvider>
   )
