@@ -75,7 +75,7 @@ export function ActivityDistribution({ points }: { points: ActivityBucketPoint[]
             />
           </YAxis>
           <Tooltip
-            cursor={{ fill: cursorFill }}
+            cursor={{ fill: cursorFill, radius: 4 }}
             formatter={(v: number, _name, { payload }) => {
               const lo = payload.bucket
               const hi = lo + step - 1
@@ -94,7 +94,12 @@ export function ActivityDistribution({ points }: { points: ActivityBucketPoint[]
             labelStyle={{ color: tipText }}
             itemStyle={{ color: tipText, textTransform: 'none' }}
           />
-          <Bar dataKey="pct" fill={barFill} fillOpacity={0.9} />
+          <Bar
+            dataKey="pct"
+            fill={barFill}
+            fillOpacity={0.9}
+            radius={[4, 4, 0, 0]}
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>
