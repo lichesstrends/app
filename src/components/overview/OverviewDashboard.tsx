@@ -2,11 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { TimeToggle, type TimeMode } from './TimeToggle'
-import { ActivityDistribution } from './ActivityDistribution'
-import { EloHeatmap } from './EloHeatmap'
-import { TopOpeningsPanel } from './TopOpeningsPanel'
-import { BigNumberCard } from './BigNumberCard'
-import { ResultSharesBar } from './ResultSharesBar'
+import { ActivityDistribution } from './dashboard/ActivityDistribution'
+import { EloHeatmap } from './dashboard/EloHeatmap'
+import { TopOpeningsPanel } from './dashboard/TopOpeningsPanel'
+import { BigNumberCard } from '../ui/BigNumberCard'
+import { ResultSharesBar } from './dashboard/ResultSharesBar'
 import { LinkCards } from './LinkCards'
 import type {
   MinMaxMonths,

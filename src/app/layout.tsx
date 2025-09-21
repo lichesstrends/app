@@ -1,6 +1,6 @@
 import './globals.css'
-import { ThemeProvider } from '@/components/ThemeProvider'
-import { Navbar } from '@/components/NavBar'
+import { ThemeProvider } from '@/contexts/theme/ThemeProvider'
+import { Navbar } from '@/components/nav/NavBar'
 
 export const metadata = {
   title: 'Lichess Trends',
