@@ -142,7 +142,6 @@ export async function getActivityDistribution(from: YyyyMm, to: YyyyMm): Promise
   const { from: f, to: t } = clampRange(minMonth, maxMonth, from, to)
   const pool = getPool()
 
-  // Sum games per white bucket and per black bucket separately, then merge
   const [wrows] = await pool.query<RowDataPacket[]>(
     `SELECT white_bucket AS bucket, SUM(games) AS g
      FROM aggregates
@@ -170,16 +169,26 @@ export async function getActivityDistribution(from: YyyyMm, to: YyyyMm): Promise
   for (const r of wrows) map.set(Number(r.bucket), (map.get(Number(r.bucket)) ?? 0) + Number(r.g ?? 0))
   for (const r of brows) map.set(Number(r.bucket), (map.get(Number(r.bucket)) ?? 0) + Number(r.g ?? 0))
 
-  const points = Array.from(map.entries())
-    .sort((a, b) => a[0] - b[0])
-    .map(([bucket, games]) => ({
-      bucket,
-      games,
-      pct: games / totalAppearances,
-    }))
+  const buckets = Array.from(map.keys()).sort((a, b) => a - b)
 
-  return { from: f, to: t, points }
+  // infer step from smallest gap
+  let step = 200
+  if (buckets.length > 1) {
+    step = Math.min(...buckets.slice(1).map((b, i) => b - buckets[i]).filter(d => d > 0))
+  }
+
+  const minB = buckets[0]
+  const maxB = buckets[buckets.length - 1]
+  const filled: { bucket: number; games: number; pct: number }[] = []
+
+  for (let b = minB; b <= maxB; b += step) {
+    const g = map.get(b) ?? 0
+    filled.push({ bucket: b, games: g, pct: g / totalAppearances })
+  }
+
+  return { from: f, to: t, points: filled }
 }
+
 
 // Heatmap of game density by (white_bucket, black_bucket)
 export async function getEloHeatmap(from: YyyyMm, to: YyyyMm): Promise<EloHeatmapResponse> {
@@ -209,19 +218,52 @@ export async function getEloHeatmap(from: YyyyMm, to: YyyyMm): Promise<EloHeatma
   const totalGames = Math.max(1, Number(trow[0]?.total ?? 0))
 
   const bucketsSet = new Set<number>()
-  const cells = rows.map(r => {
-    const whiteBucket = Number(r.wb)
-    const blackBucket = Number(r.bb)
-    const games = Number(r.g ?? 0)
-    const whiteWins = Number(r.ww ?? 0)
-    const blackWins = Number(r.bw ?? 0)
-    const draws     = Number(r.dr ?? 0)
-    bucketsSet.add(whiteBucket); bucketsSet.add(blackBucket)
-    return { whiteBucket, blackBucket, games, whiteWins, blackWins, draws }
-  })
+  const cellMap = new Map<string, { games: number; ww: number; bw: number; dr: number }>()
+
+  for (const r of rows) {
+    const wb = Number(r.wb)
+    const bb = Number(r.bb)
+    const g  = Number(r.g ?? 0)
+    const ww = Number(r.ww ?? 0)
+    const bw = Number(r.bw ?? 0)
+    const dr = Number(r.dr ?? 0)
+    bucketsSet.add(wb); bucketsSet.add(bb)
+    cellMap.set(`${wb}:${bb}`, { games: g, ww, bw, dr })
+  }
 
   const buckets = Array.from(bucketsSet).sort((a, b) => a - b)
-  return { from: f, to: t, buckets, cells, totalGames }
+
+  // infer step from smallest gap
+  let step = 200
+  if (buckets.length > 1) {
+    step = Math.min(...buckets.slice(1).map((b, i) => b - buckets[i]).filter(d => d > 0))
+  }
+
+  const minB = buckets[0]
+  const maxB = buckets[buckets.length - 1]
+
+  // fill all possible cells
+  const cells: EloHeatmapResponse['cells'] = []
+  for (let wb = minB; wb <= maxB; wb += step) {
+    for (let bb = minB; bb <= maxB; bb += step) {
+      const key = `${wb}:${bb}`
+      const entry = cellMap.get(key)
+      if (entry) {
+        cells.push({
+          whiteBucket: wb,
+          blackBucket: bb,
+          games: entry.games,
+          whiteWins: entry.ww,
+          blackWins: entry.bw,
+          draws: entry.dr,
+        })
+      } else {
+        cells.push({ whiteBucket: wb, blackBucket: bb, games: 0, whiteWins: 0, blackWins: 0, draws: 0 })
+      }
+    }
+  }
+
+  return { from: f, to: t, buckets: Array.from({length: (maxB - minB)/step + 1}, (_,i) => minB + i*step), cells, totalGames }
 }
 
 // Top N openings (families) for a range
