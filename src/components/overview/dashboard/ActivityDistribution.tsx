@@ -1,14 +1,15 @@
 'use client'
 import { ActivityBucketPoint } from '@/types'
-import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Label } from 'recharts'
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useTheme } from 'next-themes'
 import { useMemo } from 'react'
+import { axisLabelCls } from '@/lib/chartStyles'
 
 export function ActivityDistribution({ points }: { points: ActivityBucketPoint[] }) {
   const { resolvedTheme } = useTheme()
   const isDark = resolvedTheme === 'dark'
 
-  // Sorted data & compute percent numbers
+  // Prepare data
   const data = useMemo(
     () =>
       points
@@ -46,50 +47,52 @@ export function ActivityDistribution({ points }: { points: ActivityBucketPoint[]
     : '1px solid rgba(148,163,184,.45)'
 
   return (
-    <div className="h-56">
-      <ResponsiveContainer>
-        <BarChart data={data} margin={{ left: 8, right: 8, top: 8, bottom: 16 }}>
-          <XAxis
-            dataKey="label"
-            tick={{ fontSize: 10, fill: axisColor }}
-          >
-            <Label value="Elo bucket" offset={-6} position="insideBottom" style={{ fill: axisColor, fontSize: 11 }} />
-          </XAxis>
-          <YAxis
-            domain={[0, 'dataMax']}
-            tick={{ fontSize: 10, fill: axisColor }}
-          >
-            <Label
-              value="% of games"
-              angle={-90}
-              position="insideLeft"
-              dy={40} // push down a bit so it's centered
-              style={{ fill: axisColor, fontSize: 11 }}
-            />
-          </YAxis>
-          <Tooltip
-            cursor={{ fill: cursorFill }}
-            formatter={(v: number, _name, { payload }) => {
-              const lo = payload.bucket
-              const hi = lo + step - 1
-              return [`${(v as number).toFixed(2)}%`, `Elo ${lo}–${hi}`]
-            }}
-            labelFormatter={() => ''}
-            wrapperStyle={{ outline: 'none' }}
-            contentStyle={{
-              background: tipBg,
-              color: tipText,
-              border: tipBorder,
-              borderRadius: 10,
-              boxShadow: 'none',
-              padding: '10px 12px',
-            }}
-            labelStyle={{ color: tipText }}
-            itemStyle={{ color: tipText, textTransform: 'none' }}
-          />
-          <Bar dataKey="pct" fill={barFill} fillOpacity={0.9} />
-        </BarChart>
-      </ResponsiveContainer>
+    <div className="flex h-56 flex-col">
+      <div className="flex flex-1">
+        {/* Y axis label */}
+        <div className="flex items-center justify-center">
+          <div className={`${axisLabelCls} rotate-180 [writing-mode:vertical-rl]`}>
+            % of games
+          </div>
+        </div>
+
+        {/* Chart */}
+        <div className="flex-1">
+          <ResponsiveContainer>
+            <BarChart data={data} margin={{ left: 8, right: 8, top: 8, bottom: 8 }}>
+              <XAxis dataKey="label" tick={{ fontSize: 10, fill: axisColor }} />
+              <YAxis domain={[0, 'dataMax']} tick={{ fontSize: 10, fill: axisColor }} />
+
+              <Tooltip
+                cursor={{ fill: cursorFill }}
+                formatter={(v: number, _name, { payload }) => {
+                  const lo = payload.bucket
+                  const hi = lo + step - 1
+                  return [`${(v as number).toFixed(2)}%`, `Elo ${lo}–${hi}`]
+                }}
+                labelFormatter={() => ''}
+                wrapperStyle={{ outline: 'none' }}
+                contentStyle={{
+                  background: tipBg,
+                  color: tipText,
+                  border: tipBorder,
+                  borderRadius: 10,
+                  boxShadow: 'none',
+                  padding: '10px 12px',
+                }}
+                labelStyle={{ color: tipText }}
+                itemStyle={{ color: tipText, textTransform: 'none' }}
+              />
+              <Bar dataKey="pct" fill={barFill} fillOpacity={0.9} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* X axis label */}
+      <div className={`mt-1 text-center ${axisLabelCls}`}>
+        Elo bucket
+      </div>
     </div>
   )
 }

@@ -1,5 +1,6 @@
 'use client'
 import { ReactNode } from 'react'
+import { Info } from 'lucide-react'
 
 export function HelpTip({ children }: { children: ReactNode }) {
   return (
@@ -7,12 +8,11 @@ export function HelpTip({ children }: { children: ReactNode }) {
       <button
         type="button"
         aria-label="Help"
-        className="flex h-6 w-6 items-center justify-center rounded-full border border-slate-300/70 text-xs text-slate-700 hover:bg-slate-100 dark:border-slate-700/70 dark:text-slate-200 dark:hover:bg-slate-800"
+        className="flex h-5 w-5 items-center justify-center text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
       >
-        i
+        <Info size={16} strokeWidth={2} />
       </button>
 
-      {/* theme-aware popover */}
       <div
         className="
           pointer-events-none absolute right-0 z-20 mt-2 w-72 rounded-lg border

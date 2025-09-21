@@ -33,7 +33,7 @@ export function EloHeatmapCard() {
     <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       {/* header + help */}
       <div className="flex items-center justify-between">
-        <div className="text-sm text-slate-600 dark:text-slate-300">{title}</div>
+        <div className="font-semibold text-sm text-slate-600 dark:text-slate-300">{title}</div>
         <HelpTip>
           {mode === 'matchup' ? (
             <>
