@@ -147,7 +147,7 @@ export default function OverviewDashboard() {
                     Elo matchup heatmap ({mode === 'last' ? 'last month' : 'all time'})
                   </div>
                   <div className="mt-2">
-                    <EloHeatmap data={heatmap!} />
+                    <EloHeatmap data={heatmap!} logK={1200} />
                   </div>
                 </div>
               </div>

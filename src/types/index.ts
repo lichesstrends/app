@@ -49,7 +49,15 @@ export type ActivityDistributionResponse = {
   points: ActivityBucketPoint[]
 }
 
-export type EloHeatmapCell = { whiteBucket: number; blackBucket: number; games: number; pct: number }
+export type EloHeatmapCell = {
+  whiteBucket: number
+  blackBucket: number
+  games: number
+  whiteWins: number
+  blackWins: number
+  draws: number
+}
+
 export type EloHeatmapResponse = {
   from: YyyyMm
   to: YyyyMm

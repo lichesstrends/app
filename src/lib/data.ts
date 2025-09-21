@@ -187,29 +187,41 @@ export async function getEloHeatmap(from: YyyyMm, to: YyyyMm): Promise<EloHeatma
   const { from: f, to: t } = clampRange(minMonth, maxMonth, from, to)
   const pool = getPool()
 
-  const [cells] = await pool.query<RowDataPacket[]>(
-    `SELECT white_bucket AS wb, black_bucket AS bb, SUM(games) AS g
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT white_bucket AS wb,
+            black_bucket AS bb,
+            SUM(games)       AS g,
+            SUM(white_wins)  AS ww,
+            SUM(black_wins)  AS bw,
+            SUM(draws)       AS dr
      FROM aggregates
      WHERE month BETWEEN ? AND ?
      GROUP BY white_bucket, black_bucket`,
     [f, t]
   )
+
   const [trow] = await pool.query<RowDataPacket[]>(
     `SELECT COALESCE(SUM(games),0) AS total
      FROM aggregates
-     WHERE month BETWEEN ? AND ?`, [f, t]
+     WHERE month BETWEEN ? AND ?`,
+    [f, t]
   )
   const totalGames = Math.max(1, Number(trow[0]?.total ?? 0))
 
-  const bs = new Set<number>()
-  const outCells = cells.map(r => {
-    const wb = Number(r.wb), bb = Number(r.bb), g = Number(r.g ?? 0)
-    bs.add(wb); bs.add(bb)
-    return { whiteBucket: wb, blackBucket: bb, games: g, pct: g / totalGames }
+  const bucketsSet = new Set<number>()
+  const cells = rows.map(r => {
+    const whiteBucket = Number(r.wb)
+    const blackBucket = Number(r.bb)
+    const games = Number(r.g ?? 0)
+    const whiteWins = Number(r.ww ?? 0)
+    const blackWins = Number(r.bw ?? 0)
+    const draws     = Number(r.dr ?? 0)
+    bucketsSet.add(whiteBucket); bucketsSet.add(blackBucket)
+    return { whiteBucket, blackBucket, games, whiteWins, blackWins, draws }
   })
-  const buckets = Array.from(bs).sort((a, b) => a - b)
 
-  return { from: f, to: t, buckets, cells: outCells, totalGames }
+  const buckets = Array.from(bucketsSet).sort((a, b) => a - b)
+  return { from: f, to: t, buckets, cells, totalGames }
 }
 
 // Top N openings (families) for a range
