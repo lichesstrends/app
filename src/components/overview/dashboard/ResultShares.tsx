@@ -15,7 +15,7 @@ export function ResultShares({
   const wrapRef = useRef<HTMLDivElement | null>(null)
   const [tip, setTip] = useState<{ key: SegKey; label: string; pct: number; x: number } | null>(null)
 
-  // Clamp -> normalize -> percentages
+  // Normalize -> percentages
   const w = Math.max(0, Math.min(1, white))
   const d = Math.max(0, Math.min(1, draw))
   const b = Math.max(0, Math.min(1, black))
@@ -24,10 +24,10 @@ export function ResultShares({
   const D = (d / total) * 100
   const B = (b / total) * 100
 
-  const segments: Array<{ key: SegKey; pct: number; label: string; className: string }> = [
-    { key: 'white', pct: W, label: 'White wins', className: 'bg-white dark:bg-slate-200' },
-    { key: 'draw',  pct: D, label: 'Draws',      className: 'bg-slate-400 dark:bg-slate-500' },
-    { key: 'black', pct: B, label: 'Black wins', className: 'bg-neutral-900 dark:bg-black' },
+  const segments = [
+    { key: 'white' as SegKey, pct: W, label: 'White wins', className: 'bg-white dark:bg-slate-200' },
+    { key: 'draw' as SegKey,  pct: D, label: 'Draws',      className: 'bg-slate-400 dark:bg-slate-500' },
+    { key: 'black' as SegKey, pct: B, label: 'Black wins', className: 'bg-neutral-900 dark:bg-black' },
   ]
 
   const onEnterOrMove = (e: React.MouseEvent, key: SegKey, label: string, pct: number) => {
@@ -40,9 +40,16 @@ export function ResultShares({
 
   const onLeave = () => setTip(null)
 
+  // Helper: compute label position (center of each segment)
+  const positions = {
+    white: W / 2,
+    draw: W + D / 2,
+    black: W + D + B / 2,
+  }
+
   return (
     <div ref={wrapRef} className="relative flex w-full items-center">
-      {/* Outer wrapper is relative (no clipping). Inner bar clips for rounded corners */}
+      {/* Bar */}
       <div className="relative h-8 w-full overflow-hidden rounded-md border border-slate-200 dark:border-slate-700">
         <div className="flex h-full w-full">
           {segments.map(({ key, pct, label, className }) => (
@@ -53,13 +60,43 @@ export function ResultShares({
               onMouseEnter={(e) => onEnterOrMove(e, key, label, pct)}
               onMouseMove={(e) => onEnterOrMove(e, key, label, pct)}
               onMouseLeave={onLeave}
-              title="" // prevent native tooltip
+              title=""
             />
           ))}
         </div>
       </div>
 
-      {/* Floating tooltip: follows cursor X, fixed Y under the bar */}
+      {/* External labels with connectors */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* White top */}
+        <div
+          className="absolute flex flex-col items-center"
+          style={{ left: `${positions.white}%`, top: '-1.5rem', transform: 'translateX(-50%)' }}
+        >
+          <div className="text-xs font-medium text-slate-600 dark:text-slate-300">White</div>
+          <div className="w-px h-4 bg-slate-400 dark:bg-slate-500"></div>
+        </div>
+
+        {/* Draw bottom */}
+        <div
+          className="absolute flex flex-col items-center"
+          style={{ left: `${positions.draw}%`, bottom: '-1.5rem', transform: 'translateX(-50%)' }}
+        >
+          <div className="w-px h-4 bg-slate-400 dark:bg-slate-500"></div>
+          <div className="text-xs font-medium text-slate-600 dark:text-slate-300">Draw</div>
+        </div>
+
+        {/* Black top */}
+        <div
+          className="absolute flex flex-col items-center"
+          style={{ left: `${positions.black}%`, top: '-1.5rem', transform: 'translateX(-50%)' }}
+        >
+          <div className="text-xs font-medium text-slate-600 dark:text-slate-300">Black</div>
+          <div className="w-px h-4 bg-slate-400 dark:bg-slate-500"></div>
+        </div>
+      </div>
+
+      {/* Floating tooltip */}
       {tip && (
         <div
           className="pointer-events-none absolute left-0 top-[calc(100%+8px)] z-10 -translate-x-1/2"

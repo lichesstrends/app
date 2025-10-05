@@ -11,7 +11,7 @@ import { TopOpeningsCard } from './cards/TopOpeningsCard'
 export default function OverviewDashboard() {
   return (
     <OverviewProvider>
-      <div className="space-y-10">
+      <div className="space-y-5">
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-semibold">Overview</h1>
           <TimeToggle />
@@ -21,10 +21,16 @@ export default function OverviewDashboard() {
           {/* Column 1 (two rows) */}
           <div className="lg:col-span-2 space-y-6">
             {/* Row A */}
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <TotalGamesCard />
-              <ResultSharesCard />
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+              {/* Total games takes 2/3, result shares 1/3 */}
+              <div className="md:col-span-2">
+                <TotalGamesCard />
+              </div>
+              <div className="md:col-span-1">
+                <ResultSharesCard />
+              </div>
             </div>
+
             {/* Row B */}
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <ActivityDistributionCard />

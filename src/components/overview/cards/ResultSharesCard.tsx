@@ -55,17 +55,20 @@ export function ResultSharesCard() {
       : { white: 0, draw: 0, black: 0 }
   }, [shares, monthly, mode])
 
-  return (
-    <div className="flex flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 min-h-[8.5rem]">
-      <div className="mb-2 text-sm font-semibold text-slate-600 dark:text-slate-300">
-        Result shares ({mode === OverviewMode.Last ? 'last month' : 'all time'})
-      </div>
+return (
+  <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 min-h-[8.5rem]">
+    {/* Title always pinned at the top */}
+    <div className="mb-2 text-sm font-semibold text-slate-600 dark:text-slate-300">
+      Result shares ({mode === OverviewMode.Last ? 'last month' : 'all time'})
+    </div>
 
+    <div className="flex flex-1 items-center">
       {pending || !shares || !monthly ? (
-        <div className="h-20 animate-pulse rounded-xl bg-slate-200/40 dark:bg-slate-800/40" />
+        <div className="h-20 w-full animate-pulse rounded-xl bg-slate-200/40 dark:bg-slate-800/40" />
       ) : (
         <ResultShares white={bar.white} draw={bar.draw} black={bar.black} />
       )}
     </div>
-  )
+  </div>
+)
 }
