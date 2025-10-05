@@ -62,7 +62,7 @@ async function _getMonthlyGames(from: YyyyMm, to: YyyyMm) {
 }
 
 async function _getLastMonthAndPrev12() {
-  const { minMonth, maxMonth } = await getMinMaxMonths()
+  const { maxMonth } = await getMinMaxMonths()
   const { from, to } = lastNMonthsEndingAt(maxMonth, 12)
   const series = await getMonthlyGames(from, to)
   const lastMonth = maxMonth

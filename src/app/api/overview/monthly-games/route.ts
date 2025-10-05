@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
-import { getMonthlyGames, apiRevalidate } from '@/lib/data'
+import { getMonthlyGames } from '@/lib/data'
 import { YyyyMm } from '@/types'
 
-export const revalidate = apiRevalidate
+export const revalidate = 600;
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)

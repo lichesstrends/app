@@ -37,7 +37,6 @@ export function AutoFitNumber({
   // Recompute when content changes
   useEffect(() => {
     recompute()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [children])
 
   return (

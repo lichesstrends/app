@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getMinMaxMonths } from '@/lib/data'
-import { apiRevalidate } from '@/lib/data'
 
-export const revalidate = apiRevalidate
+export const revalidate = 600;
 
 export async function GET() {
   const data = await getMinMaxMonths()

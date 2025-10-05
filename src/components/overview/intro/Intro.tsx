@@ -11,7 +11,7 @@ export default function Intro() {
 
       <p className="text-[13px] leading-6 text-slate-600 dark:text-slate-300">
         <strong>LichessTrends</strong> is an open-source project that
-        aggregates the monthly Lichess classical game dumps into nice charts. It's built on top of{' '}
+        aggregates the monthly Lichess classical game dumps into nice charts. It&apos;s built on top of{' '}
         <Link
           href="https://lichess.org/"
           target="_blank"
