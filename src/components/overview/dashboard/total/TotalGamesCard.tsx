@@ -5,6 +5,7 @@ import type { TotalGamesResponse, MonthlyGamesResponse } from '@/types'
 import { TotalGames } from './TotalGames'
 import { TotalGamesSparkline } from './TotalGamesSparkline'
 import { ArrowDownRight, ArrowUpRight } from 'lucide-react'
+import { DashboardCard } from '../DashboardCard'
 
 export function TotalGamesCard() {
   const range = useRangeFromMode()
@@ -40,57 +41,69 @@ export function TotalGamesCard() {
     if (prev > 0) pctChange = (last - prev) / prev
   }
 
-  return (
-    <div className="h-full flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 min-h-[10rem]">
-      {/* Header */}
-      <div className="mb-2 flex items-center justify-between text-sm font-semibold text-slate-600 dark:text-slate-300">
-        <div className="flex items-center">
-          <span>Tot​al games ({mode === OverviewMode.Last ? 'last month' : 'all time'})</span>
-          {mode === OverviewMode.Last && pctChange !== null && (
-            <span className={`ml-2 flex items-center gap-1 font-medium ${pctChange >= 0 ? 'text-sky-500' : 'text-red-500'}`}>
-              {pctChange >= 0 ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
-              {(pctChange * 100).toFixed(1)}%
-            </span>
-          )}
-        </div>
+  const title = (
+    <div className="flex items-center">
+      <span>Tot​al games ({mode === OverviewMode.Last ? 'last month' : 'all time'})</span>
+      {mode === OverviewMode.Last && pctChange !== null && (
+        <span
+          className={`ml-2 flex items-center gap-1 text-sm font-medium ${
+            pctChange >= 0 ? 'text-sky-500' : 'text-red-500'
+          }`}
+        >
+          {pctChange >= 0 ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
+          {(pctChange * 100).toFixed(1)}%
+        </span>
+      )}
+    </div>
+  )
 
-        {mode === OverviewMode.Ever && qTotal.data?.from && (
-          <div className="rounded-full bg-slate-200/60 px-2 py-0.5 text-xs font-medium text-slate-700 dark:bg-slate-800/70 dark:text-slate-300">
-            since {new Date(qTotal.data.from + '-01').toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
-          </div>
-        )}
+  const right =
+    mode === OverviewMode.Ever && qTotal.data?.from ? (
+      <div className="rounded-full bg-slate-200/60 px-2 py-0.5 text-xs font-medium text-slate-700 dark:bg-slate-800/70 dark:text-slate-300">
+        since {new Date(qTotal.data.from + '-01').toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
       </div>
+    ) : null
 
-      {/* Body: number (2/3) + sparkline (1/3) */}
-      {mode === OverviewMode.Last ? (
-<div className="flex flex-1 items-center gap-4">
-  <div
-    className="basis-2/3 min-w-0 flex items-center justify-center"
-    style={{ containerType: 'inline-size', containerName: 'num' }}
-  >
-    <span
-      className="tabular-nums font-semibold leading-none block"
-      style={{
-        // bigger scaling so it reads bolder in Last month mode
-        fontSize: 'clamp(2rem, 15cqi, 4rem)',
-        whiteSpace: 'nowrap',
-      }}
-    >
-      <TotalGames value={target} loading={loading} />
-    </span>
-  </div>
-
-  <div className="basis-1/3">
-    {qSeries.isPending || !qSeries.data ? (
-      <div className="h-20 w-full animate-pulse rounded bg-slate-200/50 dark:bg-slate-800/50" />
+  const info =
+    mode === OverviewMode.Last ? (
+      <>
+        <div className="mb-1 font-medium">What am I seeing?</div>
+        <p className="mb-1">Total games for the last month + a 12-month sparkline for context.</p>
+        <p className="mb-0">Change % = vs. previous month.</p>
+      </>
     ) : (
-      <TotalGamesSparkline className="h-20 w-full" series={qSeries.data.points.slice(-12)} />
-    )}
-  </div>
-</div>
+      <>
+        <div className="mb-1 font-medium">All-time total</div>
+        <p className="mb-0">Cumulative games since your first recorded month.</p>
+      </>
+    )
+
+  return (
+    <DashboardCard title={title} right={right} info={info} minHeightClassName="min-h-[10rem]">
+      {mode === OverviewMode.Last ? (
+        <div className="flex w-full items-center gap-4">
+          <div
+            className="basis-2/3 min-w-0 flex items-center justify-center"
+            style={{ containerType: 'inline-size', containerName: 'num' }}
+          >
+            <span
+              className="tabular-nums font-semibold leading-none block"
+              style={{ fontSize: 'clamp(2rem, 15cqi, 4rem)', whiteSpace: 'nowrap' }}
+            >
+              <TotalGames value={target} loading={loading} />
+            </span>
+          </div>
+          <div className="basis-1/3">
+            {qSeries.isPending || !qSeries.data ? (
+              <div className="h-20 w-full animate-pulse rounded bg-slate-200/50 dark:bg-slate-800/50" />
+            ) : (
+              <TotalGamesSparkline className="h-20 w-full" series={qSeries.data.points.slice(-12)} />
+            )}
+          </div>
+        </div>
       ) : (
         <div
-          className="flex flex-1 items-center justify-center"
+          className="flex w-full items-center justify-center"
           style={{ containerType: 'inline-size', containerName: 'num' }}
         >
           <span
@@ -101,6 +114,6 @@ export function TotalGamesCard() {
           </span>
         </div>
       )}
-    </div>
+    </DashboardCard>
   )
 }

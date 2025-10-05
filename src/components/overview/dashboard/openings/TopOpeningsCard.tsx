@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useOverview, useRangeFromMode, OverviewMode } from '@/contexts/overview/OverviewContext'
 import type { TopOpeningsResponse } from '@/types'
 import { TopOpeningsPanel } from './TopOpeningsPanel'
+import { DashboardCard } from '../DashboardCard'
 
 export function TopOpeningsCard() {
   const { mode } = useOverview()
@@ -19,19 +20,22 @@ export function TopOpeningsCard() {
   })
 
   const showSkeleton = !range || q.isPending || !q.data
+  const title = `Top 3 most played openings (${mode === OverviewMode.Last ? 'last month' : 'all time'})`
+  const info = (
+    <>
+      <div className="mb-1 font-medium">What’s shown</div>
+      <p className="mb-1">Your three most-played opening groups for the selected period.</p>
+      <p className="mb-0">Left mini-board plays a short sample line from the ECO family; share is the % of games.</p>
+    </>
+  )
 
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <div className="text-sm text-slate-600 dark:text-slate-300">
-        Top 3 most played openings ({mode === OverviewMode.Last ? 'last month' : 'all time'})
-      </div>
-      <div className="mt-3 flex-1">
-        {showSkeleton ? (
-          <div className="h-full animate-pulse rounded-xl bg-slate-200/40 dark:bg-slate-800/40" />
-        ) : (
-          <TopOpeningsPanel data={q.data} />
-        )}
-      </div>
-    </div>
+    <DashboardCard title={title} info={info}>
+      {showSkeleton ? (
+        <div className="h-full animate-pulse rounded-xl bg-slate-200/40 dark:bg-slate-800/40" />
+      ) : (
+        <TopOpeningsPanel data={q.data} />
+      )}
+    </DashboardCard>
   )
 }

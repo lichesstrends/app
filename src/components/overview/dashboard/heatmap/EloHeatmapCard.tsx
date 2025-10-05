@@ -4,7 +4,7 @@ import { useOverview, useRangeFromMode, OverviewMode } from '@/contexts/overview
 import type { EloHeatmapResponse } from '@/types'
 import { EloHeatmap } from './EloHeatmap'
 import { useState } from 'react'
-import { HelpTip } from '@/components/ui/HelpTip'
+import { DashboardCard } from '../DashboardCard'
 
 type Mode = 'matchup' | 'result'
 
@@ -29,36 +29,33 @@ export function EloHeatmapCard() {
       ? `Elo matchup heatmap (${overviewMode === OverviewMode.Last ? 'last month' : 'all time'})`
       : `Elo result heatmap (${overviewMode === OverviewMode.Last ? 'last month' : 'all time'})`
 
-  return (
-    <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <div className="flex items-center justify-between">
-        <div className="font-semibold text-sm text-slate-600 dark:text-slate-300">{title}</div>
-        <HelpTip>
-          {mode === 'matchup' ? (
-            <>
-              <div className="font-medium mb-1">Matchups mode</div>
-              <p>Color shows game <strong>density</strong> for White (X) vs Black (Y) Elo buckets. Grey = no games.</p>
-            </>
-          ) : (
-            <>
-              <div className="font-medium mb-1">Results mode</div>
-              <p>Color tilts toward <strong>white</strong> (green) or <strong>black</strong> (red) advantage in each bucket pair.
-                 Grey = no games. Hover a cell for the W/D/B breakdown.</p>
-            </>
-          )}
-        </HelpTip>
-      </div>
+  const info =
+    mode === 'matchup' ? (
+      <>
+        <div className="mb-1 font-medium">Matchups mode</div>
+        <p className="mb-0">
+          Color shows game <strong>density</strong> for White (X) vs Black (Y) Elo buckets. Grey = no games.
+        </p>
+      </>
+    ) : (
+      <>
+        <div className="mb-1 font-medium">Results mode</div>
+        <p className="mb-0">
+          Color tilts toward <strong>white</strong> (green) or <strong>black</strong> (red) advantage in each bucket pair.
+          Grey = no games. Hover a cell for the W/D/B breakdown.
+        </p>
+      </>
+    )
 
-      {/* Center the heatmap vertically */}
-      <div className="mt-2 flex flex-1 items-center">
-        <div className="w-full">
-          {showSkeleton ? (
-            <div className="h-56 animate-pulse rounded-xl bg-slate-200/40 dark:bg-slate-800/40" />
-          ) : (
-            <EloHeatmap data={q.data} logK={1000} mode={mode} onModeChange={setMode} />
-          )}
-        </div>
+  return (
+    <DashboardCard title={title} info={info}>
+      <div className="w-full">
+        {showSkeleton ? (
+          <div className="h-56 animate-pulse rounded-xl bg-slate-200/40 dark:bg-slate-800/40" />
+        ) : (
+          <EloHeatmap data={q.data} logK={1000} mode={mode} onModeChange={setMode} />
+        )}
       </div>
-    </div>
+    </DashboardCard>
   )
 }

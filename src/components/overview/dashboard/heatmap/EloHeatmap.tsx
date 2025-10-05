@@ -3,6 +3,7 @@ import { EloHeatmapResponse } from '@/types'
 import { useMemo, useState } from 'react'
 import { useTheme } from 'next-themes'
 import { axisLabelCls } from '@/lib/chartStyles'
+import { SegmentedToggle } from '@/components/ui/SegmentedToggle'
 
 export type HeatMode = 'matchup' | 'result'
 
@@ -243,29 +244,16 @@ export function EloHeatmap({
         </div>
 
         {/* Vertical segmented toggle under the legend */}
-        <div className="mt-2 flex w-full flex-col overflow-hidden rounded-xl border border-slate-300 text-[11px] dark:border-slate-700">
-          <button
-            onClick={() => setMode('matchup')}
-            className={`cursor-pointer px-2 py-1 transition-colors ${
-              m === 'matchup'
-                ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-                : 'text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800'
-            }`}
-
-          >
-            Matchups
-          </button>
-          <div className="h-px w-full bg-slate-300/70 dark:bg-slate-700/70" />
-          <button
-            onClick={() => setMode('result')}
-            className={`cursor-pointer px-2 py-1 transition-colors ${
-              m === 'result'
-                ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-                : 'text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800'
-            }`}
-          >
-            Results
-          </button>
+        <div className="mt-2">
+          <SegmentedToggle
+            orientation="vertical"
+            value={m}
+            onChange={(next) => setMode(next)}
+            options={[
+              { label: 'Matchups', value: 'matchup' },
+              { label: 'Results',  value: 'result'  },
+            ]}
+          />
         </div>
       </div>
     </div>

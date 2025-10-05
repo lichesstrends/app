@@ -3,6 +3,7 @@ import { ThemeProvider } from '@/contexts/theme/ThemeProvider'
 import { QueryProvider } from '@/contexts/query/QueryProvider'
 import { MonthsProvider } from '@/contexts/meta/MonthsProvider'
 import { Navbar } from '@/components/nav/NavBar'
+import { Footer } from '@/components/layout/Footer'
 
 export const metadata = {
   title: 'Lichess Trends',
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <MonthsProvider>
               <Navbar />
               <main className="mx-auto max-w-6xl px-4 pb-16 pt-8">{children}</main>
+              <Footer />
             </MonthsProvider>
           </QueryProvider>
         </ThemeProvider>
