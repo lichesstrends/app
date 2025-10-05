@@ -1,3 +1,4 @@
+import { unstable_cache } from 'next/cache'
 import { getPool } from './db'
 import type { RowDataPacket } from 'mysql2'
 import type {
@@ -12,10 +13,10 @@ import type {
 import { isYyyyMm, clampRange, lastNMonthsEndingAt, previousMonth } from './date'
 import { getEcoFamily } from './eco'
 
-const REVALIDATE_SECONDS = Number(process.env.REVALIDATE_SECONDS ?? 600)
-export const apiRevalidate = REVALIDATE_SECONDS
+const WEEK = 60 * 60 * 24 * 7 // 7 days in seconds
 
-export async function getMinMaxMonths(): Promise<MinMaxMonths> {
+/** ------------------ RAW (uncached) helpers ------------------ */
+async function _getMinMaxMonths(): Promise<MinMaxMonths> {
   const pool = getPool()
   const [rows] = await pool.query<RowDataPacket[]>(
     `SELECT MIN(month) AS minMonth, MAX(month) AS maxMonth FROM aggregates`
@@ -28,7 +29,7 @@ export async function getMinMaxMonths(): Promise<MinMaxMonths> {
   return { minMonth: minRaw, maxMonth: maxRaw }
 }
 
-export async function getTotalGames(from: YyyyMm, to: YyyyMm) {
+async function _getTotalGames(from: YyyyMm, to: YyyyMm) {
   const { minMonth, maxMonth } = await getMinMaxMonths()
   const { from: f, to: t } = clampRange(minMonth, maxMonth, from, to)
   const pool = getPool()
@@ -41,7 +42,7 @@ export async function getTotalGames(from: YyyyMm, to: YyyyMm) {
   return { from: f, to: t, totalGames: Number(rows[0]?.totalGames ?? 0) }
 }
 
-export async function getMonthlyGames(from: YyyyMm, to: YyyyMm) {
+async function _getMonthlyGames(from: YyyyMm, to: YyyyMm) {
   const { minMonth, maxMonth } = await getMinMaxMonths()
   const { from: f, to: t } = clampRange(minMonth, maxMonth, from, to)
   const pool = getPool()
@@ -60,14 +61,13 @@ export async function getMonthlyGames(from: YyyyMm, to: YyyyMm) {
   return { from: f, to: t, points }
 }
 
-export async function getLastMonthAndPrev12() {
+async function _getLastMonthAndPrev12() {
   const { minMonth, maxMonth } = await getMinMaxMonths()
   const { from, to } = lastNMonthsEndingAt(maxMonth, 12)
   const series = await getMonthlyGames(from, to)
   const lastMonth = maxMonth
   const monthBefore = previousMonth(maxMonth)
 
-  // games last month / prior month
   const lastMap = new Map(series.points.map((p) => [p.month, p.games]))
   const lastGames = lastMap.get(lastMonth) ?? 0
   const prevGames = lastMap.get(monthBefore) ?? 0
@@ -76,7 +76,7 @@ export async function getLastMonthAndPrev12() {
   return { series, lastMonth, lastGames, prevGames, pct }
 }
 
-export async function getResultShares(from: YyyyMm, to: YyyyMm) {
+async function _getResultShares(from: YyyyMm, to: YyyyMm) {
   const { minMonth, maxMonth } = await getMinMaxMonths()
   const { from: f, to: t } = clampRange(minMonth, maxMonth, from, to)
   const pool = getPool()
@@ -97,7 +97,7 @@ export async function getResultShares(from: YyyyMm, to: YyyyMm) {
   return { from: f, to: t, points }
 }
 
-export async function getTopOpening(from: YyyyMm, to: YyyyMm) {
+async function _getTopOpening(from: YyyyMm, to: YyyyMm) {
   const { minMonth, maxMonth } = await getMinMaxMonths()
   const { from: f, to: t } = clampRange(minMonth, maxMonth, from, to)
   const pool = getPool()
@@ -136,8 +136,7 @@ export async function getTopOpening(from: YyyyMm, to: YyyyMm) {
   }
 }
 
-// Game-weighted rating distribution across buckets (white + black appearances)
-export async function getActivityDistribution(from: YyyyMm, to: YyyyMm): Promise<ActivityDistributionResponse> {
+async function _getActivityDistribution(from: YyyyMm, to: YyyyMm): Promise<ActivityDistributionResponse> {
   const { minMonth, maxMonth } = await getMinMaxMonths()
   const { from: f, to: t } = clampRange(minMonth, maxMonth, from, to)
   const pool = getPool()
@@ -171,7 +170,6 @@ export async function getActivityDistribution(from: YyyyMm, to: YyyyMm): Promise
 
   const buckets = Array.from(map.keys()).sort((a, b) => a - b)
 
-  // infer step from smallest gap
   let step = 200
   if (buckets.length > 1) {
     step = Math.min(...buckets.slice(1).map((b, i) => b - buckets[i]).filter(d => d > 0))
@@ -189,9 +187,7 @@ export async function getActivityDistribution(from: YyyyMm, to: YyyyMm): Promise
   return { from: f, to: t, points: filled }
 }
 
-
-// Heatmap of game density by (white_bucket, black_bucket)
-export async function getEloHeatmap(from: YyyyMm, to: YyyyMm): Promise<EloHeatmapResponse> {
+async function _getEloHeatmap(from: YyyyMm, to: YyyyMm): Promise<EloHeatmapResponse> {
   const { minMonth, maxMonth } = await getMinMaxMonths()
   const { from: f, to: t } = clampRange(minMonth, maxMonth, from, to)
   const pool = getPool()
@@ -233,7 +229,6 @@ export async function getEloHeatmap(from: YyyyMm, to: YyyyMm): Promise<EloHeatma
 
   const buckets = Array.from(bucketsSet).sort((a, b) => a - b)
 
-  // infer step from smallest gap
   let step = 200
   if (buckets.length > 1) {
     step = Math.min(...buckets.slice(1).map((b, i) => b - buckets[i]).filter(d => d > 0))
@@ -242,7 +237,6 @@ export async function getEloHeatmap(from: YyyyMm, to: YyyyMm): Promise<EloHeatma
   const minB = buckets[0]
   const maxB = buckets[buckets.length - 1]
 
-  // fill all possible cells
   const cells: EloHeatmapResponse['cells'] = []
   for (let wb = minB; wb <= maxB; wb += step) {
     for (let bb = minB; bb <= maxB; bb += step) {
@@ -263,11 +257,16 @@ export async function getEloHeatmap(from: YyyyMm, to: YyyyMm): Promise<EloHeatma
     }
   }
 
-  return { from: f, to: t, buckets: Array.from({length: (maxB - minB)/step + 1}, (_,i) => minB + i*step), cells, totalGames }
+  return {
+    from: f,
+    to: t,
+    buckets: Array.from({ length: (maxB - minB) / step + 1 }, (_, i) => minB + i * step),
+    cells,
+    totalGames
+  }
 }
 
-// Top N openings (families) for a range
-export async function getTopOpenings(from: YyyyMm, to: YyyyMm, limit = 3): Promise<TopOpeningsResponse> {
+async function _getTopOpenings(from: YyyyMm, to: YyyyMm, limit = 3): Promise<TopOpeningsResponse> {
   const { minMonth, maxMonth } = await getMinMaxMonths()
   const { from: f, to: t } = clampRange(minMonth, maxMonth, from, to)
   const pool = getPool()
@@ -304,3 +303,14 @@ export async function getTopOpenings(from: YyyyMm, to: YyyyMm, limit = 3): Promi
 
   return { from: f, to: t, items }
 }
+
+/** ------------------ CACHED exports (7 days) ------------------ */
+export const getMinMaxMonths = unstable_cache(_getMinMaxMonths, ['getMinMaxMonths'], { revalidate: WEEK })
+export const getTotalGames = unstable_cache(_getTotalGames, ['getTotalGames'], { revalidate: WEEK })
+export const getMonthlyGames = unstable_cache(_getMonthlyGames, ['getMonthlyGames'], { revalidate: WEEK })
+export const getLastMonthAndPrev12 = unstable_cache(_getLastMonthAndPrev12, ['getLastMonthAndPrev12'], { revalidate: WEEK })
+export const getResultShares = unstable_cache(_getResultShares, ['getResultShares'], { revalidate: WEEK })
+export const getTopOpening = unstable_cache(_getTopOpening, ['getTopOpening'], { revalidate: WEEK })
+export const getActivityDistribution = unstable_cache(_getActivityDistribution, ['getActivityDistribution'], { revalidate: WEEK })
+export const getEloHeatmap = unstable_cache(_getEloHeatmap, ['getEloHeatmap'], { revalidate: WEEK })
+export const getTopOpenings = unstable_cache(_getTopOpenings, ['getTopOpenings'], { revalidate: WEEK })

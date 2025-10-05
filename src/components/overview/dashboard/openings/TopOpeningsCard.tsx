@@ -20,7 +20,7 @@ export function TopOpeningsCard() {
   })
 
   const showSkeleton = !range || q.isPending || !q.data
-  const title = `Top 3 most played openings (${mode === OverviewMode.Last ? 'last month' : 'all time'})`
+  const title = `Top 3 openings (${mode === OverviewMode.Last ? 'last month' : 'all time'})`
   const info = (
     <>
       <div className="mb-1 font-medium">What’s shown</div>
