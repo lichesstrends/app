@@ -39,6 +39,7 @@ export function MiniOpeningBoard({ san }: { san: string }) {
           position: fen,           // always a FEN (never "start")
           showNotation: false,
           allowDragging: false,
+          allowDrawingArrows: false,  
           animationDurationInMs: 300,
         }}
       />
