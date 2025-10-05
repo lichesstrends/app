@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { useQueries } from '@tanstack/react-query'
 import { useOverview, useRangeFromMode, OverviewMode } from '@/contexts/overview/OverviewContext'
 import type { MonthlyGamesResponse, ResultSharesResponse } from '@/types'
-import { ResultShares } from '../dashboard/ResultShares'
+import { ResultShares } from './ResultShares'
 
 export function ResultSharesCard() {
   const { mode } = useOverview()

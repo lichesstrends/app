@@ -1,4 +1,4 @@
-import OverviewDashboard from '@/components/overview/OverviewDashboard'
+import OverviewDashboard from '@/components/overview/dashboard/OverviewDashboard'
 
 export const revalidate = Number(process.env.REVALIDATE_SECONDS ?? 600)
 

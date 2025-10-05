@@ -3,14 +3,19 @@ import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'rec
 import { useTheme } from 'next-themes'
 import type { MonthlyGamesPoint } from '@/types'
 
-export function TotalGamesSparkline({ series }: { series: MonthlyGamesPoint[] }) {
+export function TotalGamesSparkline({
+  series,
+  className = 'h-20 w-full',
+}: {
+  series: MonthlyGamesPoint[]
+  className?: string
+}) {
   const { resolvedTheme } = useTheme()
   const isDark = resolvedTheme === 'dark'
-
   const stroke = isDark ? '#38bdf8' : '#0284c7'
 
   return (
-    <div className="w-32 h-20">
+    <div className={className}>
       <ResponsiveContainer>
         <AreaChart data={series}>
           <defs>
@@ -35,14 +40,7 @@ export function TotalGamesSparkline({ series }: { series: MonthlyGamesPoint[] })
               )
             }}
           />
-          <Area
-            type="monotone"
-            dataKey="games"
-            stroke={stroke}
-            strokeWidth={2}
-            fill="url(#sparklineFill)"
-            dot={false}
-          />
+          <Area type="monotone" dataKey="games" stroke={stroke} strokeWidth={2} fill="url(#sparklineFill)" dot={false} />
         </AreaChart>
       </ResponsiveContainer>
     </div>

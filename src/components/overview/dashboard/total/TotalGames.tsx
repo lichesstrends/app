@@ -48,5 +48,5 @@ export function TotalGames({
     return <span className="animate-pulse text-slate-400 dark:text-slate-600">0</span>
   }
 
-  return <>{display.toLocaleString()}</>
+  return <>{(display).toLocaleString()}</>
 }

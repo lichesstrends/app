@@ -2,7 +2,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useOverview, useRangeFromMode, OverviewMode } from '@/contexts/overview/OverviewContext'
 import type { TopOpeningsResponse } from '@/types'
-import { TopOpeningsPanel } from '../dashboard/TopOpeningsPanel'
+import { TopOpeningsPanel } from './TopOpeningsPanel'
 
 export function TopOpeningsCard() {
   const { mode } = useOverview()
