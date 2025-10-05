@@ -7,11 +7,9 @@ export function getPool() {
   const url = process.env.DATABASE_URL
   if (!url) throw new Error('DATABASE_URL is not set')
 
-  const useSSL = String(process.env.MYSQL_SSL ?? 'true') !== 'false'
-
   pool = mysql.createPool({
     uri: url,
-    ssl: useSSL ? { minVersion: 'TLSv1.2' } : undefined,
+    ssl: { minVersion: 'TLSv1.2' },
     connectionLimit: 5,
   })
   return pool

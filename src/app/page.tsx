@@ -2,7 +2,7 @@ import Dashboard from '@/components/overview/dashboard/Dashboard'
 import Explore from '@/components/overview/explore/Explore'
 import Intro from '@/components/overview/intro/Intro'
 
-export const revalidate = Number(process.env.REVALIDATE_SECONDS ?? 600)
+export const revalidate = 600;
 
 export default function OverviewPage() {
   return (

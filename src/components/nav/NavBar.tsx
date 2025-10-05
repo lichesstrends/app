@@ -16,7 +16,6 @@ const nav = [
 
 export function Navbar() {
   const pathname = usePathname()
-  const siteName = process.env.NEXT_PUBLIC_SITE_NAME || 'Lichess Trends'
 
   // same style as ThemeToggle (icon-only)
   const iconBtn =
