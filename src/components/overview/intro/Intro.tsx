@@ -6,7 +6,7 @@ export default function Intro() {
   return (
     <section className="space-y-3">
       <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-        What is it?
+        Welcome to LichessTrends!
       </h2>
 
       <p className="text-[13px] leading-6 text-slate-600 dark:text-slate-300">

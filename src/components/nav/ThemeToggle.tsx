@@ -11,9 +11,9 @@ export function ThemeToggle() {
 
   const isDark = resolvedTheme === 'dark'
   const btn =
-    'inline-flex h-8 w-8 items-center justify-center rounded-lg ' + // ⬅ slight rounding
-    'border border-slate-300 text-slate-700 transition ' +
-    'hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800'
+    'inline-flex h-8 w-8 items-center justify-center rounded-lg ' +
+    'border border-slate-300 text-slate-700 transition hover:bg-slate-100 cursor-pointer ' +
+    'dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800'
 
   return (
     <button
