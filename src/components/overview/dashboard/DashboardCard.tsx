@@ -18,7 +18,7 @@ export function DashboardCard({
   const [hoverInfo, setHoverInfo] = useState(false)
 
   return (
-    <div className={`flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 ${minHeightClassName}`}>
+    <div className={`flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 ${minHeightClassName}`}>
       {/* Header */}
 <div className="mb-2 flex justify-between">
   <div className="min-h-[20px] flex items-center text-sm leading-5 text-slate-600 dark:text-slate-300">
