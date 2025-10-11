@@ -47,7 +47,7 @@ export default function Intro() {
           newTab
           icon={<Plug size={16} />}
           title="API"
-          body="Access our API documentation."
+          body="Access the API documentation."
         />
       </div>
     </section>
@@ -72,10 +72,9 @@ function CardLink({
       href={href}
       target={newTab ? '_blank' : undefined}
       rel={newTab ? 'noreferrer' : undefined}
-      className="group block rounded-xl border border-slate-200 p-3 transition
-                 hover:-translate-y-0.5 hover:shadow-sm focus:outline-none
-                 dark:border-slate-800
-                 dark:hover:shadow-none"
+      className="group block rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition
+                 hover:-translate-y-0.5 hover:shadow-md focus:outline-none
+                 dark:border-slate-800 dark:bg-slate-900"
     >
       <div className="flex items-center gap-2 text-[13px] font-medium text-slate-700 dark:text-slate-200">
         {icon && (
