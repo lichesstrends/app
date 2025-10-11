@@ -6,7 +6,7 @@ export const revalidate = 600;
 
 export default function OverviewPage() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 overflow-x-hidden">
       <Intro />
       <Dashboard />
       <Explore />

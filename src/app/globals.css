@@ -1,6 +1,48 @@
+/* app/src/app/globals.css */
 @import "tailwindcss";
 
 /* Tell Tailwind v4 to use the `.dark` class instead of the media query */
 @custom-variant dark (&:where(.dark, .dark *));
 
 html, body { min-height: 100%; }
+
+/* Your original color var + grid tuning vars */
+:root {
+  --chess-line: rgba(0, 0, 0, 0.05);
+  --iso-gap: 96px;           /* distance between lines */
+  --iso-thickness: 2px;      /* line thickness */
+  --iso-color: var(--chess-line);
+}
+
+.dark {
+  --chess-line: rgba(255, 255, 255, 0.05);
+}
+
+/* Fixed, behind-everything isometric grid */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;               /* stays under your UI */
+  pointer-events: none;
+
+  background-image:
+    /* 30° lines */
+    repeating-linear-gradient(
+      30deg,
+      var(--iso-color) 0 var(--iso-thickness),
+      transparent var(--iso-thickness) var(--iso-gap)
+    ),
+    /* 150° lines */
+    repeating-linear-gradient(
+      150deg,
+      var(--iso-color) 0 var(--iso-thickness),
+      transparent var(--iso-thickness) var(--iso-gap)
+    );
+  /* no background-size — keeps a true isometric tiling */
+}
+
+/* Optional: slightly denser grid on small screens */
+@media (max-width: 640px) {
+  :root { --iso-gap: 72px; }
+}

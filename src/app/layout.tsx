@@ -7,7 +7,7 @@ import { Footer } from '@/components/layout/Footer'
 import { Atkinson_Hyperlegible } from 'next/font/google'
 
 export const metadata = {
-  title: 'Lichess Trends',
+  title: 'LichessTrends',
   description: 'Explore Lichess openings, results, and trends over time.',
 }
 
