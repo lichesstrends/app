@@ -20,26 +20,26 @@ export default function Intro() {
         >
           Lichess
         </Link>
-        , a free and open-source chess platform with an open-data initiative. Beyond the dahboard,{' '}
+        , a free and open-source chess platform with an open-data initiative. Beyond the dashboard,{' '}
         <strong>LichessTrends</strong> lets you visualize many statistics:
         {` `}♟️ opening popularity, ⚖️ win/draw rates, 🎯 performance by Elo buckets, and 📈 evolution over time.
       </p>
 
       <div className="grid gap-3 sm:grid-cols-3">
         <CardLink
-          href="https://database.lichess.org/"
-          newTab
-          icon={<Database size={16} />}
-          title="Data"
-          body="Monthly public dumps; we parse games, bucket ratings, and map openings by ECO families."
-        />
-
-        <CardLink
           href="/about"
           newTab
           icon={<BookOpen size={16} />}
           title="Learn more"
-          body="How the pipeline works, assumptions, and privacy notes. MIT-licensed, contributions welcome."
+          body="Discover how the aggregation pipeline works, and how the app was built."
+        />
+
+        <CardLink
+          href="https://database.lichess.org/"
+          newTab
+          icon={<Database size={16} />}
+          title="Lichess database"
+          body="View the Lichess monthly public dumps that LichessTrends parses and aggregates."
         />
 
         <CardLink
@@ -47,7 +47,7 @@ export default function Intro() {
           newTab
           icon={<Plug size={16} />}
           title="API"
-          body="Lightweight JSON feeds here, or tap straight into the official Lichess API for raw games."
+          body="Access our API documentation."
         />
       </div>
     </section>
@@ -74,7 +74,7 @@ function CardLink({
       rel={newTab ? 'noreferrer' : undefined}
       className="group block rounded-xl border border-slate-200 p-3 transition
                  hover:-translate-y-0.5 hover:shadow-sm focus:outline-none
-                 focus:ring-2 focus:ring-sky-400 dark:border-slate-800
+                 dark:border-slate-800
                  dark:hover:shadow-none"
     >
       <div className="flex items-center gap-2 text-[13px] font-medium text-slate-700 dark:text-slate-200">

@@ -22,9 +22,9 @@ const items: ExploreItem[] = [
 
 export default function Explore() {
   return (
-    <section className="space-y-3">
+    <section className="space-y-4">
       <div className="flex items-center">
-        <h2 className="text-xl font-semibold">Explore</h2>
+        <h1 className="text-2xl font-semibold">Explore</h1>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

@@ -1,11 +1,12 @@
 'use client'
 import Link from 'next/link'
-import { ExternalLink, Github } from 'lucide-react'
+import { ExternalLink } from 'lucide-react'
+import packageJson from '../../../package.json'
 
 export function Footer() {
   return (
     <footer className="border-t border-slate-200 bg-white/70 backdrop-blur dark:border-slate-800 dark:bg-slate-950/70">
-      <div className="mx-auto max-w-6xl px-4 py-10">
+      <div className="mx-auto max-w-6xl px-4 py-6">
         <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-4">
           {/* Brand / byline */}
           <div>
@@ -60,6 +61,16 @@ export function Footer() {
             </div>
             <ul className="mt-3 space-y-2 text-sm">
               <li>
+                <a
+                  href="https://database.lichess.org/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-slate-700 hover:underline dark:text-slate-200"
+                >
+                  Lichess data <ExternalLink size={14} />
+                </a>
+              </li>
+              <li>
                 <Link href="/about" className="text-slate-700 hover:underline dark:text-slate-200">
                   About
                 </Link>
@@ -68,26 +79,6 @@ export function Footer() {
                 <Link href="/api" className="text-slate-700 hover:underline dark:text-slate-200">
                   API
                 </Link>
-              </li>
-              <li>
-                <a
-                  href="https://lichess.org/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-slate-700 hover:underline dark:text-slate-200"
-                >
-                  Lichess <ExternalLink size={14} />
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://database.lichess.org/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-slate-700 hover:underline dark:text-slate-200"
-                >
-                  Lichess dumps <ExternalLink size={14} />
-                </a>
               </li>
             </ul>
           </div>
@@ -99,25 +90,18 @@ export function Footer() {
             </div>
             <ul className="mt-3 space-y-2 text-sm">
               <li>
-                <a
-                  href="https://github.com/your-org/lichesstrends-aggregator"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-slate-700 hover:underline dark:text-slate-200"
-                >
-                  <Github size={14} />
-                  Aggregator repo
-                </a>
+                <Link href="/changelog" className="text-slate-700 hover:underline dark:text-slate-200">
+                  Changelog
+                </Link>
               </li>
               <li>
                 <a
-                  href="https://github.com/your-org/lichesstrends-app"
+                  href="https://github.com/lichesstrends"
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-1 text-slate-700 hover:underline dark:text-slate-200"
                 >
-                  <Github size={14} />
-                  App repo
+                  Github <ExternalLink size={14} />
                 </a>
               </li>
               <li>
@@ -127,7 +111,7 @@ export function Footer() {
                   rel="noreferrer"
                   className="inline-flex items-center gap-1 text-slate-700 hover:underline dark:text-slate-200"
                 >
-                  X (Twitter) <ExternalLink size={14} />
+                  X / Twitter <ExternalLink size={14} />
                 </a>
               </li>
             </ul>
@@ -136,7 +120,7 @@ export function Footer() {
 
         {/* Bottom line */}
         <div className="mt-8 flex flex-col items-start justify-between gap-2 border-t border-slate-200 pt-4 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400 sm:flex-row">
-          <div>© {new Date().getFullYear()} LichessTrends.</div>
+          <div>© {new Date().getFullYear()} LichessTrends v{packageJson.version}.</div>
           <div className="flex items-center gap-4">
             <Link href="/privacy" className="hover:underline">
               Privacy

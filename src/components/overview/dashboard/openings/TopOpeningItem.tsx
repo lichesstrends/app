@@ -14,7 +14,6 @@ export function TopOpeningItem({
   }
 
   return (
-    // 👇 THIS min-w-0 is the key so children can actually truncate
     <div className="min-w-0 flex h-full items-center rounded-xl border border-slate-200 p-3 dark:border-slate-800">
       {/* LEFT: mini chessboard */}
       <div className="flex-shrink-0">
@@ -30,11 +29,15 @@ export function TopOpeningItem({
           {index + 1}. {item.displayName}
         </div>
 
-        <div
-          className="block w-full truncate text-xs text-slate-500 dark:text-slate-400"
-          title={item.ecoGroup}
-        >
-          {item.ecoGroup}
+        <div className="mt-0.5">
+          <span
+            title={item.ecoGroup}
+            className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5
+                       text-[11px] font-medium text-slate-700 shadow-sm select-none
+                       dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+          >
+            {item.ecoGroup}
+          </span>
         </div>
 
         <div className="mt-1 text-xs text-slate-600 dark:text-slate-300">

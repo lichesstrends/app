@@ -4,8 +4,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import clsx from 'clsx'
-import { Github, Menu, X } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
+import { SiGithub } from '@icons-pack/react-simple-icons'
 
 const navLinks = [
   { href: '/', label: 'Overview' },
@@ -90,14 +91,14 @@ export function Navbar() {
           {/* Right: Icons */}
           <div className="flex items-center gap-2">
             <a
-              href="https://github.com/lichesstrends/app"
+              href="https://github.com/lichesstrends"
               target="_blank"
               rel="noreferrer"
               className={clsx('hidden md:inline-flex', iconBtn)}
               aria-label="GitHub"
               title="GitHub"
             >
-              <Github size={16} />
+              <SiGithub size={16} />
             </a>
 
             <ThemeToggle />

@@ -1,0 +1,14 @@
+{
+  "releases": [
+    {
+      "version": "v0.1.0",
+      "date": "October 11, 2025",
+      "summary": "Our initial release! Setting the foundation for exploring Lichess data.",
+      "changes": [
+        "✨ Added base layout with navigation and footer.",
+        "📊 Launched the overview page with dashboard and explore sections.",
+        "🔧 Set up core components for charts and data visualization."
+      ]
+    }
+  ]
+}
