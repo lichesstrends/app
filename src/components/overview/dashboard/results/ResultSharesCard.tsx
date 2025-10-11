@@ -5,6 +5,7 @@ import { useOverview, useRangeFromMode, OverviewMode } from '@/contexts/overview
 import type { MonthlyGamesResponse, ResultSharesResponse } from '@/types'
 import { ResultShares } from './ResultShares'
 import { DashboardCard } from '../DashboardCard'
+import { ResultSharesInfo } from './ResultSharesInfo'
 
 export function ResultSharesCard() {
   const { mode } = useOverview()
@@ -55,16 +56,9 @@ export function ResultSharesCard() {
   }, [shares, monthly, mode])
 
   const title = `Result shares (${mode === OverviewMode.Last ? 'last month' : 'all time'})`
-  const info = (
-    <>
-      <div className="mb-1 font-medium">How to read</div>
-      <p className="mb-1">Share of outcomes among games in the selected period.</p>
-      <p className="mb-0"><strong>Hover</strong> the bar to see exact percentages for White, Draw, and Black.</p>
-    </>
-  )
 
   return (
-    <DashboardCard title={title} info={info} minHeightClassName="min-h-[8.5rem]">
+    <DashboardCard title={title} info={<ResultSharesInfo />} minHeightClassName="min-h-[8.5rem]">
       {pending || !shares || !monthly ? (
         <div className="h-20 w-full animate-pulse rounded-xl bg-slate-200/40 dark:bg-slate-800/40" />
       ) : (

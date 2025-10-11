@@ -6,6 +6,7 @@ import { TotalGames } from './TotalGames'
 import { TotalGamesSparkline } from './TotalGamesSparkline'
 import { ArrowDownRight, ArrowUpRight } from 'lucide-react'
 import { DashboardCard } from '../DashboardCard'
+import { TotalGamesInfo } from './TotalGamesInfo'
 
 export function TotalGamesCard() {
   const range = useRangeFromMode()
@@ -64,22 +65,8 @@ export function TotalGamesCard() {
       </div>
     ) : null
 
-  const info =
-    mode === OverviewMode.Last ? (
-      <>
-        <div className="mb-1 font-medium">What am I seeing?</div>
-        <p className="mb-1">Total games for the last month + a 12-month sparkline for context.</p>
-        <p className="mb-0">Change % = vs. previous month.</p>
-      </>
-    ) : (
-      <>
-        <div className="mb-1 font-medium">All-time total</div>
-        <p className="mb-0">Cumulative games since your first recorded month.</p>
-      </>
-    )
-
   return (
-    <DashboardCard title={title} right={right} info={info} minHeightClassName="min-h-[10rem]">
+    <DashboardCard title={title} right={right} info={<TotalGamesInfo mode={mode} />} minHeightClassName="min-h-[10rem]">
       {mode === OverviewMode.Last ? (
         <div className="flex w-full items-center gap-4">
           <div

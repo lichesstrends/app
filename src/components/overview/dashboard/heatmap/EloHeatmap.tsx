@@ -1,9 +1,11 @@
+// app/src/components/overview/dashboard/heatmap/EloHeatmap.tsx
 'use client'
 import { EloHeatmapResponse } from '@/types'
 import { useMemo, useState } from 'react'
 import { useTheme } from 'next-themes'
 import { axisLabelCls } from '@/lib/chartStyles'
 import { SegmentedToggle } from '@/components/ui/SegmentedToggle'
+import { TooltipContent } from '@/components/ui/TooltipContent'
 
 export type HeatMode = 'matchup' | 'result'
 
@@ -79,10 +81,7 @@ export function EloHeatmap({
 
   const tDensity = useMemo(() => makeLogTransform(logK), [logK])
 
-  // Tooltip theming
-  const tipBg     = isDark ? 'rgba(2,6,23,0.92)' : 'rgba(255,255,255,0.98)'
-  const tipText   = isDark ? '#e5e7eb' : '#0f172a'
-  const tipBorder = isDark ? '1px solid rgba(148,163,184,.35)' : '1px solid rgba(148,163,184,.45)'
+  // Divider color
   const divider   = isDark ? 'rgba(148,163,184,.35)' : 'rgba(148,163,184,.45)'
 
   return (
@@ -138,11 +137,8 @@ export function EloHeatmap({
                     <div key={`${wb}-${bb}`} className="group relative">
                       <div className="h-full w-full rounded-[3px]" style={{ background: color }} />
 
-                      {/* Tooltip (theme-aware, with separator; result icons are white/grey/black) */}
-                      <div
-                        className="pointer-events-none absolute left-full top-1/2 z-10 ml-2 w-60 -translate-y-1/2 rounded-lg p-3 opacity-0 shadow-sm ring-1 transition-opacity duration-75 group-hover:opacity-100"
-                        style={{ background: tipBg, color: tipText, border: tipBorder }}
-                      >
+                      {/* Tooltip */}
+                      <TooltipContent className="absolute left-full top-1/2 z-10 ml-2 w-60 -translate-y-1/2 opacity-0 transition-opacity duration-75 group-hover:opacity-100">
                         <div className="flex items-center justify-between text-xs">
                           <div className="font-medium">White Elo</div>
                           <div className="tabular-nums">{loW}–{hiW}</div>
@@ -198,7 +194,7 @@ export function EloHeatmap({
                             </div>
                           </div>
                         )}
-                      </div>
+                      </TooltipContent>
                     </div>
                   )
                 })

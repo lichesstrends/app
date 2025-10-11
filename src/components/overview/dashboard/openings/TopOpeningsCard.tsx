@@ -4,6 +4,7 @@ import { useOverview, useRangeFromMode, OverviewMode } from '@/contexts/overview
 import type { TopOpeningsResponse } from '@/types'
 import { TopOpeningsPanel } from './TopOpeningsPanel'
 import { DashboardCard } from '../DashboardCard'
+import { TopOpeningsInfo } from './TopOpeningsInfo'
 
 export function TopOpeningsCard() {
   const { mode } = useOverview()
@@ -21,16 +22,9 @@ export function TopOpeningsCard() {
 
   const showSkeleton = !range || q.isPending || !q.data
   const title = `Top 3 openings (${mode === OverviewMode.Last ? 'last month' : 'all time'})`
-  const info = (
-    <>
-      <div className="mb-1 font-medium">What’s shown</div>
-      <p className="mb-1">Your three most-played opening groups for the selected period.</p>
-      <p className="mb-0">Left mini-board plays a short sample line from the ECO family; share is the % of games.</p>
-    </>
-  )
 
   return (
-    <DashboardCard title={title} info={info}>
+    <DashboardCard title={title} info={<TopOpeningsInfo />}>
       {showSkeleton ? (
         <div className="h-full animate-pulse rounded-xl bg-slate-200/40 dark:bg-slate-800/40" />
       ) : (

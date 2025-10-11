@@ -5,6 +5,7 @@ import type { EloHeatmapResponse } from '@/types'
 import { EloHeatmap } from './EloHeatmap'
 import { useState } from 'react'
 import { DashboardCard } from '../DashboardCard'
+import { EloHeatmapInfo } from './EloHeatmapInfo'
 
 type Mode = 'matchup' | 'result'
 
@@ -29,26 +30,8 @@ export function EloHeatmapCard() {
       ? `Elo matchup heatmap (${overviewMode === OverviewMode.Last ? 'last month' : 'all time'})`
       : `Elo result heatmap (${overviewMode === OverviewMode.Last ? 'last month' : 'all time'})`
 
-  const info =
-    mode === 'matchup' ? (
-      <>
-        <div className="mb-1 font-medium">Matchups mode</div>
-        <p className="mb-0">
-          Color shows game <strong>density</strong> for White (X) vs Black (Y) Elo buckets. Grey = no games.
-        </p>
-      </>
-    ) : (
-      <>
-        <div className="mb-1 font-medium">Results mode</div>
-        <p className="mb-0">
-          Color tilts toward <strong>white</strong> (green) or <strong>black</strong> (red) advantage in each bucket pair.
-          Grey = no games. Hover a cell for the W/D/B breakdown.
-        </p>
-      </>
-    )
-
   return (
-    <DashboardCard title={title} info={info}>
+    <DashboardCard title={title} info={<EloHeatmapInfo mode={mode} />} >
       <div className="w-full">
         {showSkeleton ? (
           <div className="h-56 animate-pulse rounded-xl bg-slate-200/40 dark:bg-slate-800/40" />

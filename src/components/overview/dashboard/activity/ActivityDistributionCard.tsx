@@ -4,6 +4,7 @@ import { useOverview, useRangeFromMode, OverviewMode } from '@/contexts/overview
 import type { ActivityDistributionResponse } from '@/types'
 import { ActivityDistribution } from './ActivityDistribution'
 import { DashboardCard } from '../DashboardCard'
+import { ActivityDistributionInfo } from './ActivityDistributionInfo'
 
 export function ActivityDistributionCard() {
   const { mode } = useOverview()
@@ -25,15 +26,7 @@ export function ActivityDistributionCard() {
   return (
     <DashboardCard
       title={`Activity distribution (${mode === OverviewMode.Last ? 'last month' : 'all time'})`}
-      info={
-        <>
-          <div className="mb-1 font-medium">What is this?</div>
-          <p>
-            Percentage of games contributed by each <strong>Elo bucket</strong> during the selected period.
-            Each game counts twice (once for White and once for Black). Bars sum to 100%.
-          </p>
-        </>
-      }
+      info={<ActivityDistributionInfo />}
     >
       <div className="w-full">
         {showSkeleton ? (
