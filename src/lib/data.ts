@@ -9,6 +9,8 @@ import type {
   ActivityDistributionResponse,
   EloHeatmapResponse,
   TopOpeningsResponse,
+  YearlyBumpSeries,
+  YearlyBumpResponse,
 } from '@/types'
 import { isYyyyMm, clampRange, lastNMonthsEndingAt, previousMonth } from './date'
 import { getEcoFamily } from './eco'
@@ -304,6 +306,69 @@ async function _getTopOpenings(from: YyyyMm, to: YyyyMm, limit = 3): Promise<Top
   return { from: f, to: t, items }
 }
 
+// NOTE: months are 'YYYY-MM'. We extract the year with SUBSTRING(month,1,4)
+async function _getYearlyOpeningGames() {
+  const pool = getPool();
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT SUBSTRING(month,1,4) AS y, eco_group AS eco, SUM(games) AS g
+     FROM aggregates
+     GROUP BY y, eco
+     ORDER BY y, g DESC`
+  );
+  return rows.map(r => ({
+    year: Number(r.y),
+    eco: String(r.eco),
+    games: Number(r.g ?? 0),
+  })) as { year: number; eco: string; games: number }[];
+}
+
+/** Build Top-K ranks per year, include share per (year, eco) for tooltips. */
+async function _getYearlyBumpTopK(topK: number): Promise<YearlyBumpResponse> {
+  const raw = await _getYearlyOpeningGames();
+
+  // 1) group by year, compute totals & quick lookup
+  const years = Array.from(new Set(raw.map(r => r.year))).sort((a, b) => a - b);
+  const byYear = new Map<number, { eco: string; games: number }[]>();
+  const totalByYear = new Map<number, number>();
+  const gamesByYearEco = new Map<string, number>(); // key = `${y}:${eco}`
+
+  for (const r of raw) {
+    const arr = byYear.get(r.year) ?? [];
+    arr.push({ eco: r.eco, games: r.games });
+    byYear.set(r.year, arr);
+
+    totalByYear.set(r.year, (totalByYear.get(r.year) ?? 0) + r.games);
+    gamesByYearEco.set(`${r.year}:${r.eco}`, r.games);
+  }
+
+  // 2) rankings per year (Top-K)
+  const topByYear = new Map<number, { eco: string; rank: number }[]>();
+  const ecoSet = new Set<string>();
+  for (const y of years) {
+    const rows = (byYear.get(y) ?? []).sort((a, b) => b.games - a.games);
+    const top = rows.slice(0, topK).map((r, i) => ({ eco: r.eco, rank: i + 1 }));
+    topByYear.set(y, top);
+    top.forEach(t => ecoSet.add(t.eco));
+  }
+
+  // 3) build series with share per year where present
+  const series: YearlyBumpSeries[] = [];
+  for (const eco of ecoSet) {
+    const meta = getEcoFamily(eco);
+    const data = years.map((y) => {
+      const entry = topByYear.get(y)?.find(t => t.eco === eco);
+      if (!entry) return { x: y, y: null as number | null }; // out of Top-K → gap
+      const total = Math.max(1, totalByYear.get(y) ?? 1);
+      const g = gamesByYearEco.get(`${y}:${eco}`) ?? 0;
+      const share = g / total; // 0..1
+      return { x: y, y: entry.rank, share };
+    });
+    series.push({ id: eco, label: meta.label, data });
+  }
+
+  return { years, topK, series };
+}
+
 /** ------------------ CACHED exports (7 days) ------------------ */
 export const getMinMaxMonths = unstable_cache(_getMinMaxMonths, ['getMinMaxMonths'], { revalidate: WEEK })
 export const getTotalGames = unstable_cache(_getTotalGames, ['getTotalGames'], { revalidate: WEEK })
@@ -314,3 +379,4 @@ export const getTopOpening = unstable_cache(_getTopOpening, ['getTopOpening'], {
 export const getActivityDistribution = unstable_cache(_getActivityDistribution, ['getActivityDistribution'], { revalidate: WEEK })
 export const getEloHeatmap = unstable_cache(_getEloHeatmap, ['getEloHeatmap'], { revalidate: WEEK })
 export const getTopOpenings = unstable_cache(_getTopOpenings, ['getTopOpenings'], { revalidate: WEEK })
+export const getYearlyBumpTopK = unstable_cache( _getYearlyBumpTopK, ['getYearlyBumpTopK'], { revalidate: WEEK });

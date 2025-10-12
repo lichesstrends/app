@@ -78,3 +78,12 @@ export type TopOpeningsResponse = {
   to: YyyyMm
   items: TopOpeningsItem[]
 }
+
+export type YearlyBumpPoint = {
+  x: number
+  y: number | null
+  /** Share of all games that year for this ECO (0..1). Present only when y != null. */
+  share?: number
+}
+export type YearlyBumpSeries = { id: string; label: string; data: YearlyBumpPoint[] }
+export type YearlyBumpResponse = { years: number[]; topK: number; series: YearlyBumpSeries[] }
