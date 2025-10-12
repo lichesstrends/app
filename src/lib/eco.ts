@@ -106,3 +106,8 @@ export function getEcoFamily(ecoGroup: string): EcoFamily {
   // Fallback
   return { range: ecoGroup, label: ecoGroup, sampleSan: 'e4 e5' }
 }
+
+/** Get all ECO families (range + label + sampleSan). */
+export function getAllEcoFamilies(): EcoFamily[] {
+  return FAMILIES.slice()
+}
