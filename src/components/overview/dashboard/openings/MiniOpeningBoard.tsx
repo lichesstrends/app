@@ -41,6 +41,8 @@ export function MiniOpeningBoard({ san }: { san: string }) {
           allowDragging: false,
           allowDrawingArrows: false,  
           animationDurationInMs: 300,
+          darkSquareStyle: { backgroundColor: "#8ca3ac" },
+          lightSquareStyle: { backgroundColor: "#dfe3e6" }
         }}
       />
     </div>
