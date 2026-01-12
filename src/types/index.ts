@@ -87,3 +87,21 @@ export type YearlyBumpPoint = {
 }
 export type YearlyBumpSeries = { id: string; label: string; data: YearlyBumpPoint[] }
 export type YearlyBumpResponse = { years: number[]; topK: number; series: YearlyBumpSeries[] }
+
+export type OpeningEloDistribution = {
+  bucket: number
+  games: number
+  pct: number
+}
+
+export type OpeningStatsResponse = {
+  from: YyyyMm
+  to: YyyyMm
+  ecoGroup: string
+  displayName: string
+  sampleSan: string
+  totalGames: number
+  share: number
+  resultsAggregate: { white: number; draw: number; black: number }
+  eloDistribution: OpeningEloDistribution[]
+}

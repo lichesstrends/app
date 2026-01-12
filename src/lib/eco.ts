@@ -111,3 +111,26 @@ export function getEcoFamily(ecoGroup: string): EcoFamily {
 export function getAllEcoFamilies(): EcoFamily[] {
   return FAMILIES.slice()
 }
+
+/**
+ * Expand a family range (e.g., "B20-B99") into all individual ECO codes for SQL matching.
+ * Returns a list like ["B20", "B21", ..., "B99"].
+ * If already a single code (e.g., "A00"), returns ["A00"].
+ */
+export function expandEcoRange(range: string): string[] {
+  if (range.includes('-')) {
+    const [start, end] = range.split('-')
+    const m1 = start.match(/^([A-E])(\d{2})$/)
+    const m2 = end.match(/^([A-E])(\d{2})$/)
+    if (!m1 || !m2 || m1[1] !== m2[1]) return [range]
+    const letter = m1[1]
+    const a = Number(m1[2])
+    const b = Number(m2[2])
+    const codes: string[] = []
+    for (let i = a; i <= b; i++) {
+      codes.push(`${letter}${String(i).padStart(2, '0')}`)
+    }
+    return codes
+  }
+  return [range]
+}

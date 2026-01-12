@@ -22,7 +22,7 @@ export default function Intro() {
         </Link>
         , a free and open-source chess platform with an open-data initiative. Beyond the dashboard,{' '}
         <strong>LichessTrends</strong> lets you visualize many statistics:
-        {` `}♟️ opening popularity, ⚖️ win/draw rates, 🎯 performance by Elo buckets, and 📈 evolution over time.
+        {` `} opening popularity, win/draw rates, performance by Elo buckets, and evolution over time.
       </p>
 
       <div className="grid gap-3 sm:grid-cols-3">

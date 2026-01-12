@@ -3,7 +3,7 @@ import { useRef, useState } from 'react'
 
 type SegKey = 'white' | 'draw' | 'black'
 
-export function ResultShares({
+export function ResultsBar({
   white,
   draw,
   black,
@@ -26,7 +26,7 @@ export function ResultShares({
 
   const segments = [
     { key: 'white' as SegKey, pct: W, label: 'White wins', className: 'bg-white dark:bg-slate-200' },
-    { key: 'draw' as SegKey,  pct: D, label: 'Draws',      className: 'bg-slate-400 dark:bg-slate-500' },
+    { key: 'draw' as SegKey, pct: D, label: 'Draws', className: 'bg-slate-400 dark:bg-slate-500' },
     { key: 'black' as SegKey, pct: B, label: 'Black wins', className: 'bg-neutral-900 dark:bg-black' },
   ]
 
@@ -74,7 +74,7 @@ export function ResultShares({
           style={{ left: `${positions.white}%`, top: '-1.5rem', transform: 'translateX(-50%)' }}
         >
           <div className="text-xs font-medium text-slate-600 dark:text-slate-300">White</div>
-          <div className="w-px h-4 bg-slate-400 dark:bg-slate-500"></div>
+          <div className="w-px h-4 bg-slate-400 dark:bg-slate-500" />
         </div>
 
         {/* Draw bottom */}
@@ -82,7 +82,7 @@ export function ResultShares({
           className="absolute flex flex-col items-center"
           style={{ left: `${positions.draw}%`, bottom: '-1.5rem', transform: 'translateX(-50%)' }}
         >
-          <div className="w-px h-4 bg-slate-400 dark:bg-slate-500"></div>
+          <div className="w-px h-4 bg-slate-400 dark:bg-slate-500" />
           <div className="text-xs font-medium text-slate-600 dark:text-slate-300">Draw</div>
         </div>
 
@@ -92,7 +92,7 @@ export function ResultShares({
           style={{ left: `${positions.black}%`, top: '-1.5rem', transform: 'translateX(-50%)' }}
         >
           <div className="text-xs font-medium text-slate-600 dark:text-slate-300">Black</div>
-          <div className="w-px h-4 bg-slate-400 dark:bg-slate-500"></div>
+          <div className="w-px h-4 bg-slate-400 dark:bg-slate-500" />
         </div>
       </div>
 

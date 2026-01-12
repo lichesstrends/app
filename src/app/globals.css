@@ -6,6 +6,9 @@
 
 html, body { min-height: 100%; }
 
+/* Prevent horizontal scrollbar from full-bleed elements */
+html { overflow-x: hidden; }
+
 /* Your original color var + grid tuning vars */
 :root {
   --chess-line: rgba(0, 0, 0, 0.05);

@@ -122,12 +122,6 @@ export function Footer() {
         <div className="mt-8 flex flex-col items-start justify-between gap-2 border-t border-slate-200 pt-4 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400 sm:flex-row">
           <div>© {new Date().getFullYear()} LichessTrends v{packageJson.version}.</div>
           <div className="flex items-center gap-4">
-            <Link href="/privacy" className="hover:underline">
-              Privacy
-            </Link>
-            <Link href="/terms" className="hover:underline">
-              Terms
-            </Link>
             <Link href="/sources" className="hover:underline">
               Sources
             </Link>

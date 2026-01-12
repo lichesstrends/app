@@ -27,7 +27,6 @@ export function OpeningsRow({
     <Marquee
       direction={reverse ? 'right' : 'left'}
       speed={speed}
-      pauseOnHover
       gradient={false}
       className="py-2"
     >

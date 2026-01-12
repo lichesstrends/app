@@ -18,7 +18,7 @@ export const OpeningCard = memo(function OpeningCard({
     <button
       type="button"
       onClick={onClick}
-      className="group flex min-w-[220px] items-center rounded-xl border border-slate-200 bg-white p-3 shadow-sm outline-none transition
+      className="group flex w-full min-w-[220px] items-center rounded-xl border border-slate-200 bg-white p-3 shadow-sm outline-none transition
                  hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2 focus-visible:ring-sky-400
                  dark:border-slate-800 dark:bg-slate-950 dark:focus-visible:ring-sky-500"
       title={`${name} (${range})`}

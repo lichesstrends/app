@@ -369,6 +369,98 @@ async function _getYearlyBumpTopK(topK: number): Promise<YearlyBumpResponse> {
   return { years, topK, series };
 }
 
+/** ------------------ Opening Stats (single opening, full detail) ------------------ */
+import type {
+  OpeningStatsResponse,
+  OpeningEloDistribution,
+} from '@/types'
+
+async function _getOpeningStats(from: YyyyMm, to: YyyyMm, ecoRange: string): Promise<OpeningStatsResponse> {
+  const { minMonth, maxMonth } = await getMinMaxMonths()
+  const { from: f, to: t } = clampRange(minMonth, maxMonth, from, to)
+  const pool = getPool()
+  const meta = getEcoFamily(ecoRange)
+
+  // eco_group in DB stores range strings like "A02-A03", not individual codes
+  // Run all queries in parallel for speed
+  const [openingResult, globalResult, whiteDistResult, blackDistResult] = await Promise.all([
+    // 1) Opening aggregate stats (games, results)
+    pool.query<RowDataPacket[]>(
+      `SELECT COALESCE(SUM(games),0) AS total,
+              COALESCE(SUM(white_wins),0) AS ww,
+              COALESCE(SUM(black_wins),0) AS bw,
+              COALESCE(SUM(draws),0) AS dr
+       FROM aggregates
+       WHERE month BETWEEN ? AND ? AND eco_group = ?`,
+      [f, t, ecoRange]
+    ),
+    // 2) Global total games (for share calculation)
+    pool.query<RowDataPacket[]>(
+      `SELECT COALESCE(SUM(games),0) AS total FROM aggregates WHERE month BETWEEN ? AND ?`,
+      [f, t]
+    ),
+    // 3) White player Elo distribution
+    pool.query<RowDataPacket[]>(
+      `SELECT white_bucket AS bucket, SUM(games) AS g
+       FROM aggregates
+       WHERE month BETWEEN ? AND ? AND eco_group = ?
+       GROUP BY white_bucket`,
+      [f, t, ecoRange]
+    ),
+    // 4) Black player Elo distribution
+    pool.query<RowDataPacket[]>(
+      `SELECT black_bucket AS bucket, SUM(games) AS g
+       FROM aggregates
+       WHERE month BETWEEN ? AND ? AND eco_group = ?
+       GROUP BY black_bucket`,
+      [f, t, ecoRange]
+    ),
+  ])
+
+  const [totalRow] = openingResult
+  const [globalRow] = globalResult
+  const [wrows] = whiteDistResult
+  const [brows] = blackDistResult
+
+  const openingGames = Number(totalRow[0]?.total ?? 0)
+  const aggWW = Number(totalRow[0]?.ww ?? 0)
+  const aggBW = Number(totalRow[0]?.bw ?? 0)
+  const aggDR = Number(totalRow[0]?.dr ?? 0)
+  const aggTotal = Math.max(1, aggWW + aggBW + aggDR)
+  const globalTotal = Math.max(1, Number(globalRow[0]?.total ?? 0))
+
+  // Combine white + black bucket distributions
+  const bucketMap = new Map<number, number>()
+  for (const r of wrows) bucketMap.set(Number(r.bucket), (bucketMap.get(Number(r.bucket)) ?? 0) + Number(r.g ?? 0))
+  for (const r of brows) bucketMap.set(Number(r.bucket), (bucketMap.get(Number(r.bucket)) ?? 0) + Number(r.g ?? 0))
+
+  const buckets = Array.from(bucketMap.keys()).sort((a, b) => a - b)
+  let step = 200
+  if (buckets.length > 1) {
+    step = Math.min(...buckets.slice(1).map((b, i) => b - buckets[i]).filter(d => d > 0))
+  }
+  const minB = buckets[0] ?? 0
+  const maxB = buckets[buckets.length - 1] ?? 0
+  const totalAppearances = Math.max(1, openingGames * 2)
+  const eloDistribution: OpeningEloDistribution[] = []
+  for (let b = minB; b <= maxB; b += step) {
+    const g = bucketMap.get(b) ?? 0
+    eloDistribution.push({ bucket: b, games: g, pct: g / totalAppearances })
+  }
+
+  return {
+    from: f,
+    to: t,
+    ecoGroup: ecoRange,
+    displayName: meta.label,
+    sampleSan: meta.sampleSan,
+    totalGames: openingGames,
+    share: openingGames / globalTotal,
+    resultsAggregate: { white: aggWW / aggTotal, draw: aggDR / aggTotal, black: aggBW / aggTotal },
+    eloDistribution,
+  }
+}
+
 /** ------------------ CACHED exports (7 days) ------------------ */
 export const getMinMaxMonths = unstable_cache(_getMinMaxMonths, ['getMinMaxMonths'], { revalidate: WEEK })
 export const getTotalGames = unstable_cache(_getTotalGames, ['getTotalGames'], { revalidate: WEEK })
@@ -380,3 +472,4 @@ export const getActivityDistribution = unstable_cache(_getActivityDistribution, 
 export const getEloHeatmap = unstable_cache(_getEloHeatmap, ['getEloHeatmap'], { revalidate: WEEK })
 export const getTopOpenings = unstable_cache(_getTopOpenings, ['getTopOpenings'], { revalidate: WEEK })
 export const getYearlyBumpTopK = unstable_cache( _getYearlyBumpTopK, ['getYearlyBumpTopK'], { revalidate: WEEK });
+export const getOpeningStats = unstable_cache(_getOpeningStats, ['getOpeningStats'], { revalidate: WEEK })
