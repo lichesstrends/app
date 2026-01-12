@@ -22,8 +22,11 @@ const techStack = [
 export default function AboutPage() {
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
-      {/* Page title */}
-      <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-4">About</h1>
+      {/* Page title with hint */}
+      <div className="flex items-baseline gap-4 mb-4">
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">About</h1>
+        <span className="text-sm text-slate-400 dark:text-slate-500">Click on the pipeline steps for more info</span>
+      </div>
 
       {/* Tech Stack - right under title, above flowchart */}
       <div className="pb-4">

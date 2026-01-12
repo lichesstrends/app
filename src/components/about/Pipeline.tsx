@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState, useMemo } from 'react'
+import { useCallback, useState, useRef } from 'react'
 import {
   ReactFlow,
   Node,
@@ -111,7 +111,7 @@ const nodeInfoMap: Record<string, NodeInfo> = {
           We stream the compressed dumps directly over HTTP. No need to download giant files first.
         </p>
         <p>
-          The data flows through a Zstd decompressor in real-time. This lets us process terabytes
+          The data flows through a zstd decompressor in real-time. This lets us process terabytes
           of data with a small memory footprint. Each game is extracted as it arrives.
         </p>
       </>
@@ -313,7 +313,7 @@ function PipelineNode({ data, selected }: NodeProps<Node<PipelineNodeData>>) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Animated edge with floating chess pieces (random pieces)
+// Animated edge with smooth flowing chess pieces
 // ─────────────────────────────────────────────────────────────────────────────
 
 function AnimatedChessEdge({
@@ -339,31 +339,69 @@ function AnimatedChessEdge({
   const showPiece = data?.showPiece as boolean
   const animationDuration = (data?.speed as number) || 2
 
-  // Pick a random chess piece on each render cycle
-  const piece = useMemo(() => CHESS_PIECES[Math.floor(Math.random() * CHESS_PIECES.length)], [])
+  // Pick random pieces once at mount - they stay the same for the lifetime of this edge
+  // Use refs so they're stable and never cause re-renders
+  const piece1 = useRef(CHESS_PIECES[Math.floor(Math.random() * CHESS_PIECES.length)]).current
+  const piece2 = useRef(CHESS_PIECES[Math.floor(Math.random() * CHESS_PIECES.length)]).current
+
+  // Unique animation name for this edge
+  const animId = `chess-move-${id.replace(/[^a-zA-Z0-9]/g, '')}`
 
   return (
     <>
+      <defs>
+        <style>
+          {`
+            @keyframes ${animId} {
+              0% { 
+                offset-distance: -10%; 
+                opacity: 0;
+              }
+              15% { 
+                opacity: 1;
+              }
+              85% { 
+                opacity: 1;
+              }
+              100% { 
+                offset-distance: 110%; 
+                opacity: 0;
+              }
+            }
+          `}
+        </style>
+      </defs>
       <BaseEdge id={id} path={edgePath} style={style} />
       {showPiece && (
-        <g>
+        <>
+          {/* First piece */}
           <text
-            className="text-lg pointer-events-none select-none"
+            className="text-2xl pointer-events-none select-none"
             fill="currentColor"
-            style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }}
+            style={{
+              offsetPath: `path('${edgePath}')`,
+              offsetRotate: '0deg',
+              animation: `${animId} ${animationDuration}s linear infinite`,
+              filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.4))',
+            }}
           >
-            <textPath href={`#${id}`} startOffset="0%">
-              <animate
-                attributeName="startOffset"
-                from="0%"
-                to="100%"
-                dur={`${animationDuration}s`}
-                repeatCount="indefinite"
-              />
-              {piece}
-            </textPath>
+            {piece1}
           </text>
-        </g>
+          {/* Second piece - offset by 50% */}
+          <text
+            className="text-2xl pointer-events-none select-none"
+            fill="currentColor"
+            style={{
+              offsetPath: `path('${edgePath}')`,
+              offsetRotate: '0deg',
+              animation: `${animId} ${animationDuration}s linear infinite`,
+              animationDelay: `-${animationDuration / 2}s`,
+              filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.4))',
+            }}
+          >
+            {piece2}
+          </text>
+        </>
       )}
       <path id={id} d={edgePath} fill="none" stroke="none" />
     </>
@@ -388,22 +426,22 @@ function InfoPanel({ nodeId }: { nodeId: string | null }) {
 
   if (!info) {
     return (
-      <div className="h-full flex items-center justify-center p-8 text-center">
+      <div className="h-full flex items-center justify-center p-6 text-center">
         <div className="text-slate-400 dark:text-slate-500">
-          <MousePointerClick className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p className="text-base font-medium mb-1">Click on any node</p>
-          <p className="text-sm opacity-75">to learn more about each step</p>
+          <MousePointerClick className="w-10 h-10 mx-auto mb-3 opacity-50" />
+          <p className="text-sm font-medium mb-1">Click on any node</p>
+          <p className="text-xs opacity-75">to learn more about each step</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="h-full p-6">
-      <h3 className={`text-xl font-semibold mb-4 ${infoPanelTitleColors[info.color]}`}>
+    <div className="h-full p-5">
+      <h3 className={`text-lg font-semibold mb-3 ${infoPanelTitleColors[info.color]}`}>
         {info.title}
       </h3>
-      <div className="space-y-3 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+      <div className="space-y-2 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
         {info.content}
       </div>
     </div>
@@ -434,7 +472,7 @@ const initialNodes: Node<PipelineNodeData>[] = [
     position: { x: 320, y: 250 },
     data: {
       label: 'HTTP Stream',
-      sublabel: 'Zstd decompression',
+      sublabel: 'zstd decompression',
       icon: 'zap',
       color: 'emerald',
     },
@@ -675,7 +713,7 @@ export function Pipeline() {
   }, [])
 
   return (
-    <div className="flex flex-col xl:flex-row w-full h-full min-h-[600px] gap-6 p-6">
+    <div className="flex flex-col xl:flex-row xl:items-center w-full h-full min-h-[500px] gap-6 px-6 py-2">
       {/* Flowchart - takes full width, centered */}
       <div className="flex-1 h-[500px] xl:h-full flex items-center justify-center">
         <ReactFlow
@@ -702,8 +740,8 @@ export function Pipeline() {
         </ReactFlow>
       </div>
 
-      {/* Info panel - fixed width card on right */}
-      <div className="w-full xl:w-96 min-h-[300px] xl:min-h-0 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm shadow-lg">
+      {/* Info panel - fixed width card on right, vertically centered */}
+      <div className="w-full xl:w-[420px] h-[420px] rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm shadow-lg overflow-auto">
         <InfoPanel nodeId={selectedNode} />
       </div>
     </div>
