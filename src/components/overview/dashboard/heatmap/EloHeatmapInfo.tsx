@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
-import { HeatMode } from './EloHeatmap'
+import { HeatmapMode } from '@/components/ui/Heatmap'
 
-export function EloHeatmapInfo({ mode }: { mode: HeatMode }): ReactNode {
+export function EloHeatmapInfo({ mode }: { mode: HeatmapMode }): ReactNode {
   return mode === 'matchup' ? (
     <p className="mb-0 text-xs">
       Color intensity shows game density for White (X) vs Black (Y) Elo buckets. Grey means no games.

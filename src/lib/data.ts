@@ -268,10 +268,107 @@ async function _getEloHeatmap(from: YyyyMm, to: YyyyMm): Promise<EloHeatmapRespo
   }
 }
 
+/**
+ * Get Elo heatmap with optional eco group filter.
+ * Works with year range (converts to months internally).
+ */
+async function _getEloHeatmapFiltered(
+  fromYear: number,
+  toYear: number,
+  eco?: string
+): Promise<EloHeatmapResponse> {
+  // Convert year range to month range
+  const from = `${fromYear}-01` as YyyyMm
+  const to = `${toYear}-12` as YyyyMm
+
+  const { minMonth, maxMonth } = await getMinMaxMonths()
+  const { from: f, to: t } = clampRange(minMonth, maxMonth, from, to)
+  const pool = getPool()
+
+  const hasEco = !!eco
+  const ecoClause = hasEco ? 'AND eco_group = ?' : ''
+  const ecoParams = hasEco ? [eco] : []
+
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT white_bucket AS wb,
+            black_bucket AS bb,
+            SUM(games)       AS g,
+            SUM(white_wins)  AS ww,
+            SUM(black_wins)  AS bw,
+            SUM(draws)       AS dr
+     FROM aggregates
+     WHERE month BETWEEN ? AND ? ${ecoClause}
+     GROUP BY white_bucket, black_bucket`,
+    [f, t, ...ecoParams]
+  )
+
+  const [trow] = await pool.query<RowDataPacket[]>(
+    `SELECT COALESCE(SUM(games),0) AS total
+     FROM aggregates
+     WHERE month BETWEEN ? AND ? ${ecoClause}`,
+    [f, t, ...ecoParams]
+  )
+  const totalGames = Math.max(1, Number(trow[0]?.total ?? 0))
+
+  const bucketsSet = new Set<number>()
+  const cellMap = new Map<string, { games: number; ww: number; bw: number; dr: number }>()
+
+  for (const r of rows) {
+    const wb = Number(r.wb)
+    const bb = Number(r.bb)
+    const g = Number(r.g ?? 0)
+    const ww = Number(r.ww ?? 0)
+    const bw = Number(r.bw ?? 0)
+    const dr = Number(r.dr ?? 0)
+    bucketsSet.add(wb)
+    bucketsSet.add(bb)
+    cellMap.set(`${wb}:${bb}`, { games: g, ww, bw, dr })
+  }
+
+  const buckets = Array.from(bucketsSet).sort((a, b) => a - b)
+
+  let step = 200
+  if (buckets.length > 1) {
+    step = Math.min(...buckets.slice(1).map((b, i) => b - buckets[i]).filter((d) => d > 0))
+  }
+
+  const minB = buckets[0] ?? 0
+  const maxB = buckets[buckets.length - 1] ?? 0
+
+  const cells: EloHeatmapResponse['cells'] = []
+  for (let wb = minB; wb <= maxB; wb += step) {
+    for (let bb = minB; bb <= maxB; bb += step) {
+      const key = `${wb}:${bb}`
+      const entry = cellMap.get(key)
+      if (entry) {
+        cells.push({
+          whiteBucket: wb,
+          blackBucket: bb,
+          games: entry.games,
+          whiteWins: entry.ww,
+          blackWins: entry.bw,
+          draws: entry.dr,
+        })
+      } else {
+        cells.push({ whiteBucket: wb, blackBucket: bb, games: 0, whiteWins: 0, blackWins: 0, draws: 0 })
+      }
+    }
+  }
+
+  return {
+    from: f,
+    to: t,
+    buckets: Array.from({ length: Math.max(0, (maxB - minB) / step + 1) }, (_, i) => minB + i * step),
+    cells,
+    totalGames,
+  }
+}
+
 async function _getTopOpenings(from: YyyyMm, to: YyyyMm, limit = 3): Promise<TopOpeningsResponse> {
   const { minMonth, maxMonth } = await getMinMaxMonths()
   const { from: f, to: t } = clampRange(minMonth, maxMonth, from, to)
   const pool = getPool()
+
 
   const [rows] = await pool.query<RowDataPacket[]>(
     `SELECT eco_group AS eco, SUM(games) AS g
@@ -470,6 +567,8 @@ export const getResultShares = unstable_cache(_getResultShares, ['getResultShare
 export const getTopOpening = unstable_cache(_getTopOpening, ['getTopOpening'], { revalidate: WEEK })
 export const getActivityDistribution = unstable_cache(_getActivityDistribution, ['getActivityDistribution'], { revalidate: WEEK })
 export const getEloHeatmap = unstable_cache(_getEloHeatmap, ['getEloHeatmap'], { revalidate: WEEK })
+export const getEloHeatmapFiltered = unstable_cache(_getEloHeatmapFiltered, ['getEloHeatmapFiltered'], { revalidate: WEEK })
 export const getTopOpenings = unstable_cache(_getTopOpenings, ['getTopOpenings'], { revalidate: WEEK })
 export const getYearlyBumpTopK = unstable_cache( _getYearlyBumpTopK, ['getYearlyBumpTopK'], { revalidate: WEEK });
 export const getOpeningStats = unstable_cache(_getOpeningStats, ['getOpeningStats'], { revalidate: WEEK })
+

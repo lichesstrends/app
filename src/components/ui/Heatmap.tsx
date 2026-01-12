@@ -1,13 +1,26 @@
-// app/src/components/overview/dashboard/heatmap/EloHeatmap.tsx
 'use client'
-import { EloHeatmapResponse } from '@/types'
 import { useMemo, useState } from 'react'
 import { useTheme } from 'next-themes'
 import { axisLabelCls } from '@/lib/chartStyles'
 import { SegmentedToggle } from '@/components/ui/SegmentedToggle'
 import { TooltipContent } from '@/components/ui/TooltipContent'
 
-export type HeatMode = 'matchup' | 'result'
+export type HeatmapMode = 'matchup' | 'result'
+
+export type HeatmapCell = {
+  whiteBucket: number
+  blackBucket: number
+  games: number
+  whiteWins: number
+  blackWins: number
+  draws: number
+}
+
+export type HeatmapData = {
+  buckets: number[]
+  cells: HeatmapCell[]
+  totalGames: number
+}
 
 /** 0..1 remap with log-like compression. logK=0 => linear. */
 function makeLogTransform(logK: number) {
@@ -24,24 +37,28 @@ function rampColor(t01: number, alphaBase = 0.25, alphaGain = 0.7) {
   return `hsl(${hue} 85% 45% / ${alpha})`
 }
 
-export function EloHeatmap({
+export type HeatmapProps = {
+  data: HeatmapData
+  logK?: number
+  mode?: HeatmapMode
+  onModeChange?: (m: HeatmapMode) => void
+  initialMode?: HeatmapMode
+  /** Show the legend and mode toggle on the side */
+  showLegend?: boolean
+}
+
+export function Heatmap({
   data,
   logK = 9,
   mode,
   onModeChange,
   initialMode = 'matchup',
-}: {
-  data: EloHeatmapResponse
-  logK?: number
-  mode?: HeatMode
-  onModeChange?: (m: HeatMode) => void
-  initialMode?: HeatMode
-}) {
+  showLegend = true,
+}: HeatmapProps) {
   // Controlled/uncontrolled
-  const [inner, setInner] = useState<HeatMode>(initialMode)
+  const [inner, setInner] = useState<HeatmapMode>(initialMode)
   const m = mode ?? inner
-  const setMode = (nm: HeatMode) => {
-    // make the switch feel instant (no debounce, no async)
+  const setMode = (nm: HeatmapMode) => {
     if (!mode) setInner(nm)
     onModeChange?.(nm)
   }
@@ -49,24 +66,24 @@ export function EloHeatmap({
   const { resolvedTheme } = useTheme()
   const isDark = resolvedTheme === 'dark'
   const NEUTRAL = isDark
-    ? 'hsl(215 16% 24% / 0.35)' // dark mode: subtle grey
-    : 'hsl(215 20% 92% / 0.8)'  // light mode: much lighter neutral
+    ? 'hsl(215 16% 24% / 0.35)'
+    : 'hsl(215 20% 92% / 0.8)'
 
   // Index cells + max for density
   const { idx, maxGames } = useMemo(() => {
-    const m = new Map<string, (typeof data.cells)[number]>()
+    const map = new Map<string, HeatmapCell>()
     let mg = 0
     for (const c of data.cells) {
       const key = `${c.whiteBucket}:${c.blackBucket}`
-      m.set(key, c)
+      map.set(key, c)
       if (c.games > mg) mg = c.games
     }
-    return { idx: m, maxGames: Math.max(1, mg) }
+    return { idx: map, maxGames: Math.max(1, mg) }
   }, [data])
 
   // X axis = WHITE buckets, Y axis = BLACK buckets
-  const xBuckets = data.buckets.slice() // white → left→right
-  const yBuckets = data.buckets.slice().reverse() // black → low at bottom (flip vertically)
+  const xBuckets = data.buckets.slice()
+  const yBuckets = data.buckets.slice().reverse()
 
   // Step for Elo range in tooltips (fallback 200)
   const step = useMemo(() => {
@@ -81,15 +98,14 @@ export function EloHeatmap({
 
   const tDensity = useMemo(() => makeLogTransform(logK), [logK])
 
-  // Divider color
-  const divider   = isDark ? 'rgba(148,163,184,.35)' : 'rgba(148,163,184,.45)'
+  const divider = isDark ? 'rgba(148,163,184,.35)' : 'rgba(148,163,184,.45)'
 
   return (
     <div className="flex gap-3">
       {/* Heatmap + axis labels */}
       <div className="flex-1">
         <div className="grid grid-cols-[auto_1fr] items-stretch gap-2">
-          {/* Y label (BLACK goes bottom→top) */}
+          {/* Y label */}
           <div className="flex items-center justify-center">
             <div className={`${axisLabelCls} rotate-180 [writing-mode:vertical-rl]`}>
               Black Elo bucket
@@ -128,7 +144,7 @@ export function EloHeatmap({
 
                   const loW = wb, hiW = wb + step - 1
                   const loB = bb, hiB = bb + step - 1
-                  const pct  = data.totalGames > 0 ? (g / data.totalGames) * 100 : 0
+                  const pct = data.totalGames > 0 ? (g / data.totalGames) * 100 : 0
                   const wPct = g ? (ww / g) * 100 : 0
                   const dPct = g ? (dr / g) * 100 : 0
                   const bPct = g ? (bw / g) * 100 : 0
@@ -176,7 +192,7 @@ export function EloHeatmap({
                               <div className="flex items-center gap-2">
                                 <span
                                   className="inline-block h-3 w-3 rounded-[3px] ring-1 ring-slate-400"
-                                  style={{ background: '#9ca3af' }} // neutral grey
+                                  style={{ background: '#9ca3af' }}
                                 />
                                 <span>Draw</span>
                               </div>
@@ -209,49 +225,50 @@ export function EloHeatmap({
         </div>
       </div>
 
-      {/* Legend (narrow) + vertical segmented toggle underneath */}
-      <div className="w-24">
-        <div className="rounded-2xl border border-slate-200 bg-white p-2 text-[11px] shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="mb-2 text-center font-medium text-slate-700 dark:text-slate-200">
-            {m === 'matchup' ? 'Density' : 'Result'}
-          </div>
+      {/* Legend + vertical segmented toggle */}
+      {showLegend && (
+        <div className="w-24">
+          <div className="rounded-2xl border border-slate-200 bg-white p-2 text-[11px] shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="mb-2 text-center font-medium text-slate-700 dark:text-slate-200">
+              {m === 'matchup' ? 'Density' : 'Result'}
+            </div>
 
-          <div className="mx-auto flex items-stretch gap-2">
-            <div
-              className="h-20 w-3 rounded-full ring-1 ring-slate-300/50 dark:ring-slate-700/50"
-              style={{ background: 'linear-gradient(to top, hsl(0 85% 45%), hsl(60 85% 45%), hsl(120 85% 45%))' }}
-            />
-            <div className="flex h-20 flex-col justify-between text-[11px] text-slate-600 dark:text-slate-300">
-              {m === 'matchup' ? (
-                <>
-                  <div>High</div>
-                  <div /> {/* nothing in the middle now */}
-                  <div>Low</div>
-                </>
-              ) : (
-                <>
-                  <div>White</div>
-                  <div>Balanced</div>
-                  <div>Black</div>
-                </>
-              )}
+            <div className="mx-auto flex items-stretch gap-2">
+              <div
+                className="h-20 w-3 rounded-full ring-1 ring-slate-300/50 dark:ring-slate-700/50"
+                style={{ background: 'linear-gradient(to top, hsl(0 85% 45%), hsl(60 85% 45%), hsl(120 85% 45%))' }}
+              />
+              <div className="flex h-20 flex-col justify-between text-[11px] text-slate-600 dark:text-slate-300">
+                {m === 'matchup' ? (
+                  <>
+                    <div>High</div>
+                    <div />
+                    <div>Low</div>
+                  </>
+                ) : (
+                  <>
+                    <div>White</div>
+                    <div>Balanced</div>
+                    <div>Black</div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Vertical segmented toggle under the legend */}
-        <div className="mt-2">
-          <SegmentedToggle
-            orientation="vertical"
-            value={m}
-            onChange={(next) => setMode(next)}
-            options={[
-              { label: 'Matchups', value: 'matchup' },
-              { label: 'Results',  value: 'result'  },
-            ]}
-          />
+          <div className="mt-2">
+            <SegmentedToggle
+              orientation="vertical"
+              value={m}
+              onChange={(next) => setMode(next)}
+              options={[
+                { label: 'Matchups', value: 'matchup' },
+                { label: 'Results', value: 'result' },
+              ]}
+            />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

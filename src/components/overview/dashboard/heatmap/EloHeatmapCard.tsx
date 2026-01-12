@@ -2,17 +2,15 @@
 import { useQuery } from '@tanstack/react-query'
 import { useOverview, useRangeFromMode, OverviewMode } from '@/contexts/overview/OverviewContext'
 import type { EloHeatmapResponse } from '@/types'
-import { EloHeatmap } from './EloHeatmap'
+import { Heatmap, HeatmapMode } from '@/components/ui/Heatmap'
 import { useState } from 'react'
 import { DashboardCard } from '../DashboardCard'
 import { EloHeatmapInfo } from './EloHeatmapInfo'
 
-type Mode = 'matchup' | 'result'
-
 export function EloHeatmapCard() {
   const range = useRangeFromMode()
   const { mode: overviewMode } = useOverview()
-  const [mode, setMode] = useState<Mode>('matchup')
+  const [mode, setMode] = useState<HeatmapMode>('matchup')
 
   const q = useQuery({
     queryKey: ['overview', 'elo-heatmap', range?.from, range?.to],
@@ -36,7 +34,7 @@ export function EloHeatmapCard() {
         {showSkeleton ? (
           <div className="h-56 animate-pulse rounded-xl bg-slate-200/40 dark:bg-slate-800/40" />
         ) : (
-          <EloHeatmap data={q.data} logK={1000} mode={mode} onModeChange={setMode} />
+          <Heatmap data={q.data} logK={1000} mode={mode} onModeChange={setMode} showLegend />
         )}
       </div>
     </DashboardCard>
