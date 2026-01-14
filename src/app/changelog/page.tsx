@@ -1,5 +1,8 @@
 // app/src/app/changelog/page.tsx
 import changelog from '@/lib/changelog.json'
+import { createMetadata } from '@/lib/metadata'
+
+export const metadata = createMetadata('Changelog', 'Updates, new features, and fixes for LichessTrends.')
 
 type Release = {
   version: string

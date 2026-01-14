@@ -1,4 +1,7 @@
 import { RatingsHeatmap } from '@/components/ratings/RatingsHeatmap'
+import { createMetadata } from '@/lib/metadata'
+
+export const metadata = createMetadata('Ratings', 'Explore Elo rating distribution and matchup heatmaps.')
 
 export const revalidate = 3600
 

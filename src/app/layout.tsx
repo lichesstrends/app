@@ -5,11 +5,9 @@ import { MonthsProvider } from '@/contexts/meta/MonthsProvider'
 import { Navbar } from '@/components/nav/NavBar'
 import { Footer } from '@/components/layout/Footer'
 import { Atkinson_Hyperlegible } from 'next/font/google'
+import { defaultMetadata } from '@/lib/metadata'
 
-export const metadata = {
-  title: 'LichessTrends',
-  description: 'Explore Lichess openings, results, and trends over time.',
-}
+export const metadata = defaultMetadata
 
 const atkinson = Atkinson_Hyperlegible({
   subsets: ['latin'],

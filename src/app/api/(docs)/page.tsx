@@ -1,10 +1,7 @@
-import { Metadata } from 'next'
 import { ApiDocsClient } from './ApiDocsClient'
+import { createMetadata } from '@/lib/metadata'
 
-export const metadata: Metadata = {
-  title: 'API Documentation | LichessTrends',
-  description: 'Interactive API documentation for the LichessTrends API. Explore endpoints for chess statistics and opening analysis.',
-}
+export const metadata = createMetadata('API', 'Interactive API documentation for the LichessTrends API.')
 
 export default function ApiPage() {
   return (

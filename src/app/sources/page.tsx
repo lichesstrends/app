@@ -1,3 +1,7 @@
+import { createMetadata } from '@/lib/metadata'
+
+export const metadata = createMetadata('Data Sources', 'Learn where LichessTrends data comes from.')
+
 export const revalidate = 3600
 
 export default function SourcesPage() {

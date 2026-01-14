@@ -1,6 +1,9 @@
 // app/src/app/openings/page.tsx
 import { Popularity } from '@/components/openings/popularity/Popularity'
 import { OpeningsShowcase } from '@/components/openings/showcase/OpeningsShowcase'
+import { createMetadata } from '@/lib/metadata'
+
+export const metadata = createMetadata('Openings', 'Explore chess opening popularity trends over time.')
 
 export const revalidate = 3600
 

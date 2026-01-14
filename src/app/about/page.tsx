@@ -1,12 +1,9 @@
-import { Metadata } from 'next'
 import { Pipeline } from '@/components/about/Pipeline'
+import { createMetadata } from '@/lib/metadata'
 
 export const revalidate = 3600
 
-export const metadata: Metadata = {
-  title: 'About | LichessTrends',
-  description: 'Learn how LichessTrends works — from data ingestion to visualization.',
-}
+export const metadata = createMetadata('About', 'Learn how LichessTrends works — from data ingestion to visualization.')
 
 const techStack = [
   { name: 'Rust', color: 'bg-orange-500/20 text-orange-600 dark:text-orange-400 border-orange-500/30' },
