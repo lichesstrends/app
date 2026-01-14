@@ -188,7 +188,7 @@ const nodeInfoMap: Record<string, NodeInfo> = {
     content: (
       <>
         <p>
-          The frontend uses React 19 and Next.js 15. TanStack Query handles data fetching.
+          The frontend uses React 19 and Next.js 16. TanStack Query handles data fetching.
           Recharts powers the visualizations.
         </p>
         <p>

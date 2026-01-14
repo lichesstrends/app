@@ -4,7 +4,7 @@ The **LichessTrends App** is a nice dashboard for visualizing trends from monthl
 
 ## Tech Stack
 
-Next.js 15, React 18, TypeScript, Tailwind CSS v4, Recharts, TanStack Query, next-themes, mysql2.
+Next.js 16, React 18, TypeScript, Tailwind CSS v4, Recharts, TanStack Query, next-themes, mysql2.
 
 ## Getting Started
 
