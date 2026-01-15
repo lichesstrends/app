@@ -43,7 +43,7 @@ export default function Intro() {
         />
 
         <CardLink
-          href="https://lichess.org/api"
+          href="/api"
           newTab
           icon={<Plug size={16} />}
           title="API"

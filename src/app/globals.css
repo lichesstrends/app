@@ -9,6 +9,71 @@ html, body { min-height: 100%; }
 /* Prevent horizontal scrollbar from full-bleed elements */
 html { overflow-x: hidden; }
 
+/* Custom scrollbar - minimal style without top/bottom buttons */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.5) transparent; /* slate-400/50 */
+}
+
+.dark * {
+  scrollbar-color: rgba(71, 85, 105, 0.6) transparent; /* slate-600/60 */
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.5);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.7);
+  background-clip: content-box;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(71, 85, 105, 0.6);
+  background-clip: content-box;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(71, 85, 105, 0.8);
+  background-clip: content-box;
+}
+
+/* Hide scrollbar buttons (arrows) completely */
+::-webkit-scrollbar-button,
+::-webkit-scrollbar-button:single-button,
+::-webkit-scrollbar-button:start,
+::-webkit-scrollbar-button:end,
+::-webkit-scrollbar-button:vertical:start,
+::-webkit-scrollbar-button:vertical:end,
+::-webkit-scrollbar-button:horizontal:start,
+::-webkit-scrollbar-button:horizontal:end,
+::-webkit-scrollbar-button:vertical:start:increment,
+::-webkit-scrollbar-button:vertical:start:decrement,
+::-webkit-scrollbar-button:vertical:end:increment,
+::-webkit-scrollbar-button:vertical:end:decrement {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  appearance: none !important;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 /* Your original color var + grid tuning vars */
 :root {
   --chess-line: rgba(0, 0, 0, 0.05);
@@ -48,4 +113,23 @@ body::before {
 /* Optional: slightly denser grid on small screens */
 @media (max-width: 640px) {
   :root { --iso-gap: 72px; }
+}
+
+/* Ensure body background is always preserved */
+body {
+  background-color: white !important;
+}
+html.dark body {
+  background-color: rgb(2 6 23) !important; /* slate-950 */
+}
+
+/* Prevent Scalar API docs from overriding body/html background */
+body.scalar-scrollbar,
+html.scalar-scrollbar,
+body[class*="scalar"],
+html[class*="scalar"] {
+  --scalar-background-1: transparent !important;
+  --scalar-background-2: transparent !important;
+  --scalar-background-3: transparent !important;
+  --scalar-sidebar-background: transparent !important;
 }
