@@ -106,7 +106,7 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="https://x.com/yourhandle"
+                  href="https://x.com/lichesstrends"
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-1 text-slate-700 hover:underline dark:text-slate-200"
