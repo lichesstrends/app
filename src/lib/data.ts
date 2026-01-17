@@ -15,7 +15,7 @@ import type {
 import { isYyyyMm, clampRange, lastNMonthsEndingAt, previousMonth } from './date'
 import { getEcoFamily } from './eco'
 
-const WEEK = 60 * 60 * 24 * 7 // 7 days in seconds
+const DAY = 60 * 60 * 24 // 24 hours in seconds
 
 /** ------------------ RAW (uncached) helpers ------------------ */
 async function _getMinMaxMonths(): Promise<MinMaxMonths> {
@@ -558,17 +558,17 @@ async function _getOpeningStats(from: YyyyMm, to: YyyyMm, ecoRange: string): Pro
   }
 }
 
-/** ------------------ CACHED exports (7 days) ------------------ */
-export const getMinMaxMonths = unstable_cache(_getMinMaxMonths, ['getMinMaxMonths'], { revalidate: WEEK })
-export const getTotalGames = unstable_cache(_getTotalGames, ['getTotalGames'], { revalidate: WEEK })
-export const getMonthlyGames = unstable_cache(_getMonthlyGames, ['getMonthlyGames'], { revalidate: WEEK })
-export const getLastMonthAndPrev12 = unstable_cache(_getLastMonthAndPrev12, ['getLastMonthAndPrev12'], { revalidate: WEEK })
-export const getResultShares = unstable_cache(_getResultShares, ['getResultShares'], { revalidate: WEEK })
-export const getTopOpening = unstable_cache(_getTopOpening, ['getTopOpening'], { revalidate: WEEK })
-export const getActivityDistribution = unstable_cache(_getActivityDistribution, ['getActivityDistribution'], { revalidate: WEEK })
-export const getEloHeatmap = unstable_cache(_getEloHeatmap, ['getEloHeatmap'], { revalidate: WEEK })
-export const getEloHeatmapFiltered = unstable_cache(_getEloHeatmapFiltered, ['getEloHeatmapFiltered'], { revalidate: WEEK })
-export const getTopOpenings = unstable_cache(_getTopOpenings, ['getTopOpenings'], { revalidate: WEEK })
-export const getYearlyBumpTopK = unstable_cache( _getYearlyBumpTopK, ['getYearlyBumpTopK'], { revalidate: WEEK });
-export const getOpeningStats = unstable_cache(_getOpeningStats, ['getOpeningStats'], { revalidate: WEEK })
+/** ------------------ CACHED exports (24 hours) ------------------ */
+export const getMinMaxMonths = unstable_cache(_getMinMaxMonths, ['getMinMaxMonths'], { revalidate: DAY })
+export const getTotalGames = unstable_cache(_getTotalGames, ['getTotalGames'], { revalidate: DAY })
+export const getMonthlyGames = unstable_cache(_getMonthlyGames, ['getMonthlyGames'], { revalidate: DAY })
+export const getLastMonthAndPrev12 = unstable_cache(_getLastMonthAndPrev12, ['getLastMonthAndPrev12'], { revalidate: DAY })
+export const getResultShares = unstable_cache(_getResultShares, ['getResultShares'], { revalidate: DAY })
+export const getTopOpening = unstable_cache(_getTopOpening, ['getTopOpening'], { revalidate: DAY })
+export const getActivityDistribution = unstable_cache(_getActivityDistribution, ['getActivityDistribution'], { revalidate: DAY })
+export const getEloHeatmap = unstable_cache(_getEloHeatmap, ['getEloHeatmap'], { revalidate: DAY })
+export const getEloHeatmapFiltered = unstable_cache(_getEloHeatmapFiltered, ['getEloHeatmapFiltered'], { revalidate: DAY })
+export const getTopOpenings = unstable_cache(_getTopOpenings, ['getTopOpenings'], { revalidate: DAY })
+export const getYearlyBumpTopK = unstable_cache( _getYearlyBumpTopK, ['getYearlyBumpTopK'], { revalidate: DAY });
+export const getOpeningStats = unstable_cache(_getOpeningStats, ['getOpeningStats'], { revalidate: DAY })
 

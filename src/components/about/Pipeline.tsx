@@ -114,6 +114,10 @@ const nodeInfoMap: Record<string, NodeInfo> = {
           The data flows through a zstd decompressor in real-time. This lets us process terabytes
           of data with a small memory footprint. Each game is extracted as it arrives.
         </p>
+        <p>
+          A GitHub Actions workflow runs daily, checks for new Lichess dumps, and automatically
+          processes any new data it finds.
+        </p>
       </>
     ),
   },
