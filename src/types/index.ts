@@ -105,3 +105,17 @@ export type OpeningStatsResponse = {
   resultsAggregate: { white: number; draw: number; black: number }
   eloDistribution: OpeningEloDistribution[]
 }
+
+export type LastMonthSummaryResponse = {
+  /** The latest month available in the database. */
+  lastMonth: YyyyMm
+  /** Total games for `lastMonth`. */
+  lastGames: number
+  /** Total games for the month immediately preceding `lastMonth`. */
+  prevGames: number
+  /** Fractional change between `lastMonth` and the previous month (0..1). */
+  pct: number
+  /** Monthly games for the 12 months ending at (and including) `lastMonth`. */
+  series: MonthlyGamesResponse
+}
+

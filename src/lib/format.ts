@@ -25,3 +25,18 @@ export function safeAverage(total: number, count: number): number {
   if (count <= 0 || !Number.isFinite(total)) return 0
   return total / count
 }
+
+const SHORT_MONTH_NAMES = [
+  'Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'Jun.',
+  'Jul.', 'Aug.', 'Sep.', 'Oct.', 'Nov.', 'Dec.',
+]
+
+/** Format a `YYYY-MM` string as `Jan. 2026`. Returns the input on parse failure. */
+export function formatYyyyMmShort(yyyyMm: string | null | undefined): string {
+  if (!yyyyMm) return ''
+  const m = /^(\d{4})-(\d{2})$/.exec(yyyyMm)
+  if (!m) return yyyyMm
+  const monthIdx = Number(m[2]) - 1
+  if (monthIdx < 0 || monthIdx > 11) return yyyyMm
+  return `${SHORT_MONTH_NAMES[monthIdx]} ${m[1]}`
+}

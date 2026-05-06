@@ -4,6 +4,7 @@ import {
   ActivityDistributionResponse,
   BadRequestResponse,
   EloHeatmapResponse,
+  LastMonthSummaryResponse,
   MinMaxMonths,
   MinMaxYears,
   MonthlyGamesResponse,
@@ -68,6 +69,19 @@ registry.registerPath({
   responses: {
     200: ok('Total game count for the period', TotalGamesResponse),
     400: badRequest,
+  },
+})
+
+registry.registerPath({
+  method: 'get',
+  path: '/api/overview/last-month-summary',
+  operationId: 'getLastMonthSummary',
+  summary: 'Get last-month games summary',
+  description:
+    'Returns total games for the most recent month, the previous month, the percentage change, and a 12-month sparkline series ending at the latest month. Convenience endpoint that bundles the data shown in the dashboard\'s totals card in a single request.',
+  tags: ['Overview'],
+  responses: {
+    200: ok('Latest month summary with 12-month series', LastMonthSummaryResponse),
   },
 })
 

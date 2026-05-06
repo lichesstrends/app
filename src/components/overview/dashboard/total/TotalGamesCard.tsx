@@ -1,20 +1,35 @@
 'use client'
 import { useQuery } from '@tanstack/react-query'
 import { useRangeFromMode, useOverview, OverviewMode } from '@/contexts/overview/OverviewContext'
-import type { TotalGamesResponse, MonthlyGamesResponse } from '@/types'
+import { useMonths } from '@/contexts/meta/MonthsProvider'
+import type { LastMonthSummaryResponse, TotalGamesResponse } from '@/types'
 import { TotalGames } from './TotalGames'
 import { TotalGamesSparkline } from './TotalGamesSparkline'
 import { ArrowDownRight, ArrowUpRight } from 'lucide-react'
 import { DashboardCard } from '../DashboardCard'
 import { TotalGamesInfo } from './TotalGamesInfo'
+import { formatYyyyMmShort } from '@/lib/format'
 
 export function TotalGamesCard() {
   const range = useRangeFromMode()
   const { mode } = useOverview()
+  const { months } = useMonths()
+
+  // Last mode: a single endpoint returns the latest-month total, the previous
+  // month, % change, and the 12-month sparkline series in one request.
+  const qSummary = useQuery({
+    queryKey: ['overview', 'last-month-summary'],
+    enabled: mode === OverviewMode.Last,
+    queryFn: async () => {
+      const r = await fetch('/api/overview/last-month-summary')
+      if (!r.ok) throw new Error('Failed to load last-month summary')
+      return (await r.json()) as LastMonthSummaryResponse
+    },
+  })
 
   const qTotal = useQuery({
     queryKey: ['overview', 'total', range?.from, range?.to],
-    enabled: !!range,
+    enabled: mode === OverviewMode.Ever && !!range,
     queryFn: async () => {
       const r = await fetch(`/api/overview/total?from=${range!.from}&to=${range!.to}`)
       if (!r.ok) throw new Error('Failed to load totals')
@@ -22,29 +37,21 @@ export function TotalGamesCard() {
     },
   })
 
-  const qSeries = useQuery({
-    queryKey: ['overview', 'monthly-12'],
-    enabled: mode === OverviewMode.Last,
-    queryFn: async () => {
-      const r = await fetch(`/api/overview/monthly-games?from=2010-01&to=2999-12`)
-      if (!r.ok) throw new Error('Failed to load monthly games')
-      return (await r.json()) as MonthlyGamesResponse
-    },
-  })
-
-  const target = qTotal.data?.totalGames
-  const loading = !range || qTotal.isPending || !qTotal.data
-
-  let pctChange: number | null = null
-  if (mode === OverviewMode.Last && qSeries.data?.points.length) {
-    const last = qSeries.data.points.at(-1)?.games ?? 0
-    const prev = qSeries.data.points.at(-2)?.games ?? 0
-    if (prev > 0) pctChange = (last - prev) / prev
-  }
+  const lastTitle = formatYyyyMmShort(months?.maxMonth ?? qSummary.data?.lastMonth)
+  const target =
+    mode === OverviewMode.Last ? qSummary.data?.lastGames : qTotal.data?.totalGames
+  const loading =
+    mode === OverviewMode.Last
+      ? qSummary.isPending || !qSummary.data
+      : !range || qTotal.isPending || !qTotal.data
+  const pctChange =
+    mode === OverviewMode.Last && qSummary.data ? qSummary.data.pct : null
 
   const title = (
     <div className="flex items-center">
-      <span>Tot​al games ({mode === OverviewMode.Last ? 'last month' : 'all time'})</span>
+      <span>
+        Tot​al games ({mode === OverviewMode.Last ? lastTitle || 'last month' : 'all time'})
+      </span>
       {mode === OverviewMode.Last && pctChange !== null && (
         <span
           className={`ml-2 flex items-center gap-1 text-sm font-medium ${
@@ -81,10 +88,10 @@ export function TotalGamesCard() {
             </span>
           </div>
           <div className="basis-1/3">
-            {qSeries.isPending || !qSeries.data ? (
+            {qSummary.isPending || !qSummary.data ? (
               <div className="h-20 w-full animate-pulse rounded bg-slate-200/50 dark:bg-slate-800/50" />
             ) : (
-              <TotalGamesSparkline className="h-20 w-full" series={qSeries.data.points.slice(-12)} />
+              <TotalGamesSparkline className="h-20 w-full" series={qSummary.data.series.points} />
             )}
           </div>
         </div>

@@ -1,13 +1,16 @@
 'use client'
 import { useQuery } from '@tanstack/react-query'
 import { useOverview, useRangeFromMode, OverviewMode } from '@/contexts/overview/OverviewContext'
+import { useMonths } from '@/contexts/meta/MonthsProvider'
 import type { TopOpeningsResponse } from '@/types'
 import { TopOpeningsPanel } from './TopOpeningsPanel'
 import { DashboardCard } from '../DashboardCard'
 import { TopOpeningsInfo } from './TopOpeningsInfo'
+import { formatYyyyMmShort } from '@/lib/format'
 
 export function TopOpeningsCard() {
   const { mode } = useOverview()
+  const { months } = useMonths()
   const range = useRangeFromMode()
 
   const q = useQuery({
@@ -21,7 +24,8 @@ export function TopOpeningsCard() {
   })
 
   const showSkeleton = !range || q.isPending || !q.data
-  const title = `Top 3 openings (${mode === OverviewMode.Last ? 'last month' : 'all time'})`
+  const lastTitle = formatYyyyMmShort(months?.maxMonth)
+  const title = `Top 3 openings (${mode === OverviewMode.Last ? lastTitle || 'last month' : 'all time'})`
 
   return (
     <DashboardCard title={title} info={<TopOpeningsInfo />}>

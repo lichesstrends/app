@@ -8,6 +8,10 @@ import { getMinMaxMonths } from '../meta'
 /**
  * Run a parameterized SELECT and return typed rows.
  *
+ * Uses `pool.execute` (server-side prepared statements) so identical SQL
+ * shapes are parsed once per connection instead of every call — noticeably
+ * faster for the dashboard's repeated aggregate queries.
+ *
  * `mysql2` already protects against SQL injection via `?` placeholders, but we
  * never inject user-controlled values into the query string itself.
  */
@@ -16,7 +20,7 @@ export async function selectRows<T extends RowDataPacket>(
   params: ReadonlyArray<unknown> = [],
   pool: Pool = getPool(),
 ): Promise<T[]> {
-  const [rows] = await pool.query<T[]>(sql, params as unknown[])
+  const [rows] = await pool.execute<T[]>(sql, params as unknown[])
   return rows
 }
 

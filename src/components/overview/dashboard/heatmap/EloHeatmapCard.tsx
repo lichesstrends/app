@@ -1,15 +1,18 @@
 'use client'
 import { useQuery } from '@tanstack/react-query'
 import { useOverview, useRangeFromMode, OverviewMode } from '@/contexts/overview/OverviewContext'
+import { useMonths } from '@/contexts/meta/MonthsProvider'
 import type { EloHeatmapResponse } from '@/types'
 import { Heatmap, HeatmapMode } from '@/components/ui/Heatmap'
 import { useState } from 'react'
 import { DashboardCard } from '../DashboardCard'
 import { EloHeatmapInfo } from './EloHeatmapInfo'
+import { formatYyyyMmShort } from '@/lib/format'
 
 export function EloHeatmapCard() {
   const range = useRangeFromMode()
   const { mode: overviewMode } = useOverview()
+  const { months } = useMonths()
   const [mode, setMode] = useState<HeatmapMode>('matchup')
 
   const q = useQuery({
@@ -23,10 +26,12 @@ export function EloHeatmapCard() {
   })
 
   const showSkeleton = !range || q.isPending || !q.data
+  const lastTitle = formatYyyyMmShort(months?.maxMonth)
+  const periodLabel = overviewMode === OverviewMode.Last ? lastTitle || 'last month' : 'all time'
   const title =
     mode === 'matchup'
-      ? `Elo matchup heatmap (${overviewMode === OverviewMode.Last ? 'last month' : 'all time'})`
-      : `Elo result heatmap (${overviewMode === OverviewMode.Last ? 'last month' : 'all time'})`
+      ? `Elo matchup heatmap (${periodLabel})`
+      : `Elo result heatmap (${periodLabel})`
 
   return (
     <DashboardCard title={title} info={<EloHeatmapInfo mode={mode} />} >

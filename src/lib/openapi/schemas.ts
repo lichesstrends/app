@@ -181,6 +181,17 @@ export const OpeningStatsResponse = registry.register(
   }),
 )
 
+export const LastMonthSummaryResponse = registry.register(
+  'LastMonthSummaryResponse',
+  z.object({
+    lastMonth: YyyyMm,
+    lastGames: Int.openapi({ description: 'Total games for the latest month' }),
+    prevGames: Int.openapi({ description: 'Total games for the month before the latest' }),
+    pct: z.number().openapi({ description: 'Fractional change vs previous month (0..1)' }),
+    series: MonthlyGamesResponse,
+  }),
+)
+
 /* ------------------------------------------------------------------ */
 /* Errors                                                              */
 /* ------------------------------------------------------------------ */

@@ -1,13 +1,16 @@
 'use client'
 import { useQuery } from '@tanstack/react-query'
 import { useOverview, useRangeFromMode, OverviewMode } from '@/contexts/overview/OverviewContext'
+import { useMonths } from '@/contexts/meta/MonthsProvider'
 import type { ActivityDistributionResponse } from '@/types'
 import { ActivityDistribution } from './ActivityDistribution'
 import { DashboardCard } from '../DashboardCard'
 import { ActivityDistributionInfo } from './ActivityDistributionInfo'
+import { formatYyyyMmShort } from '@/lib/format'
 
 export function ActivityDistributionCard() {
   const { mode } = useOverview()
+  const { months } = useMonths()
   const range = useRangeFromMode()
 
   const q = useQuery({
@@ -22,10 +25,12 @@ export function ActivityDistributionCard() {
 
   const showSkeleton = !range || q.isPending || !q.data
   const showError = q.isError
+  const lastTitle = formatYyyyMmShort(months?.maxMonth)
+  const periodLabel = mode === OverviewMode.Last ? lastTitle || 'last month' : 'all time'
 
   return (
     <DashboardCard
-      title={`Activity distribution (${mode === OverviewMode.Last ? 'last month' : 'all time'})`}
+      title={`Activity distribution (${periodLabel})`}
       info={<ActivityDistributionInfo />}
     >
       <div className="w-full">
