@@ -7,38 +7,22 @@ import { useMonths } from '@/contexts/meta/MonthsProvider'
 import type { OpeningStatsResponse, YyyyMm } from '@/types'
 import { AnimatedMiniBoard } from './AnimatedMiniBoard'
 import { ResultsBar } from '@/components/ui/ResultsBar'
+import { MiniStat } from '@/components/ui/MiniStat'
 import { formatNumber, formatPercent, formatOneIn } from '@/lib/format'
-
-function MiniStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="text-center">
-      <div className="text-lg font-semibold text-slate-800 dark:text-slate-100">{value}</div>
-      <div className="text-xs text-slate-500 dark:text-slate-400">{label}</div>
-    </div>
-  )
-}
+import { inferBucketStep, formatBucketRange } from '@/lib/buckets'
+import { EM_DASH } from '@/lib/ui'
 
 function SkeletonBlock({ className = '' }: { className?: string }) {
   return <div className={`animate-pulse rounded bg-slate-200 dark:bg-slate-700 ${className}`} />
 }
 
 function EloDistributionChart({ data }: { data: OpeningStatsResponse['eloDistribution'] }) {
-  // Infer bucket step (typically 200)
   const step = useMemo(() => {
-    if (data.length < 2) return 200
-    const sorted = data.slice().sort((a, b) => a.bucket - b.bucket)
-    let best = Number.POSITIVE_INFINITY
-    for (let i = 1; i < sorted.length; i++) {
-      const d = sorted[i].bucket - sorted[i - 1].bucket
-      if (d > 0 && d < best) best = d
-    }
-    return Number.isFinite(best) ? best : 200
+    const buckets = data.map((d) => d.bucket).sort((a, b) => a - b)
+    return inferBucketStep(buckets)
   }, [data])
 
   const maxPct = Math.max(...data.map((d) => d.pct), 0.01)
-
-  // Format bucket as range (e.g., "1800-1999")
-  const formatBucket = (bucket: number) => `${bucket}–${bucket + step - 1}`
 
   return (
     <div className="space-y-1">
@@ -50,14 +34,14 @@ function EloDistributionChart({ data }: { data: OpeningStatsResponse['eloDistrib
             style={{ height: `${(d.pct / maxPct) * 100}%`, minHeight: d.pct > 0 ? 2 : 0 }}
           >
             <div className="absolute bottom-full left-1/2 mb-1 -translate-x-1/2 whitespace-nowrap rounded bg-slate-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-slate-100 dark:text-slate-900 pointer-events-none z-10">
-              {formatBucket(d.bucket)}: {formatPercent(d.pct)}
+              {formatBucketRange(d.bucket, step)}: {formatPercent(d.pct)}
             </div>
           </div>
         ))}
       </div>
       <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
-        <span>{data[0] ? formatBucket(data[0].bucket) : ''}</span>
-        <span>{data[data.length - 1] ? formatBucket(data[data.length - 1].bucket) : ''}</span>
+        <span>{data[0] ? formatBucketRange(data[0].bucket, step) : ''}</span>
+        <span>{data[data.length - 1] ? formatBucketRange(data[data.length - 1].bucket, step) : ''}</span>
       </div>
     </div>
   )
@@ -103,21 +87,15 @@ export function OpeningModal({
 
   // Infer bucket step for range formatting
   const eloStep = useMemo(() => {
-    if (!data?.eloDistribution || data.eloDistribution.length < 2) return 200
-    const sorted = data.eloDistribution.slice().sort((a, b) => a.bucket - b.bucket)
-    let best = Number.POSITIVE_INFINITY
-    for (let i = 1; i < sorted.length; i++) {
-      const d = sorted[i].bucket - sorted[i - 1].bucket
-      if (d > 0 && d < best) best = d
-    }
-    return Number.isFinite(best) ? best : 200
+    const buckets = (data?.eloDistribution ?? []).map((d) => d.bucket).sort((a, b) => a - b)
+    return inferBucketStep(buckets)
   }, [data?.eloDistribution])
 
   const mostCommonElo = useMemo(() => {
-    if (!data?.eloDistribution?.length) return '—'
+    if (!data?.eloDistribution?.length) return EM_DASH
     const best = data.eloDistribution.reduce((a, b) => (b.pct > a.pct ? b : a), data.eloDistribution[0])
-    if (!best) return '—'
-    return `${best.bucket}–${best.bucket + eloStep - 1}`
+    if (!best) return EM_DASH
+    return formatBucketRange(best.bucket, eloStep)
   }, [data?.eloDistribution, eloStep])
 
   if (!open) return null

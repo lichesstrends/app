@@ -1,13 +1,8 @@
 'use client'
-import Link from 'next/link'
 
-type ExploreItem = {
-  href: string
-  title: string
-  description: string
-}
+import { CardLink } from '@/components/ui/CardLink'
 
-const items: ExploreItem[] = [
+const items = [
   {
     href: '/openings',
     title: 'Openings',
@@ -18,7 +13,7 @@ const items: ExploreItem[] = [
     title: 'Ratings',
     description: 'Distribution of games across rating buckets and trends over time.',
   },
-]
+] as const
 
 export default function Explore() {
   return (
@@ -29,19 +24,14 @@ export default function Explore() {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {items.map((it) => (
-          <Link
+          <CardLink
             key={it.href}
             href={it.href}
-            className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
-          >
-            <div className="text-lg font-semibold">{it.title}</div>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-              {it.description}
-            </p>
-            <div className="mt-4 text-sm text-sky-600 group-hover:underline dark:text-sky-400">
-              Explore →
-            </div>
-          </Link>
+            title={it.title}
+            body={it.description}
+            cta="Explore →"
+            size="md"
+          />
         ))}
       </div>
     </section>

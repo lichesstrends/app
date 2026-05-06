@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server'
+import { defineGetRoute } from '@/app/api/_lib/handler'
 import { getMinMaxMonths } from '@/lib/data'
 
-export const revalidate = 600;
+export const revalidate = 600
 
-export async function GET() {
-  const data = await getMinMaxMonths()
-  return NextResponse.json(data)
-}
+export const GET = defineGetRoute({
+  revalidate,
+  handler: () => getMinMaxMonths(),
+})

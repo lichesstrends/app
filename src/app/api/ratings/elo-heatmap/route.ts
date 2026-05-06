@@ -1,25 +1,27 @@
-import { NextResponse } from 'next/server'
-import { getEloHeatmapFiltered } from '@/lib/data'
+import { z } from 'zod'
+import { defineGetRoute } from '@/app/api/_lib/handler'
+import { getEloHeatmap } from '@/lib/data'
+import type { YyyyMm } from '@/types'
+import { EcoRangeSchema, YearSchema } from '@/lib/validation'
 
 export const revalidate = 600
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url)
-  const fromYear = searchParams.get('fromYear')
-  const toYear = searchParams.get('toYear')
-  const eco = searchParams.get('eco') || undefined
+const QuerySchema = z
+  .object({
+    fromYear: YearSchema,
+    toYear: YearSchema,
+    eco: EcoRangeSchema.optional(),
+  })
+  .refine(({ fromYear, toYear }) => fromYear <= toYear, {
+    message: '`fromYear` must be <= `toYear`',
+  })
 
-  if (!fromYear || !toYear) {
-    return NextResponse.json({ error: 'fromYear & toYear required' }, { status: 400 })
-  }
-
-  const from = Number(fromYear)
-  const to = Number(toYear)
-
-  if (isNaN(from) || isNaN(to) || from > to) {
-    return NextResponse.json({ error: 'Invalid year range' }, { status: 400 })
-  }
-
-  const data = await getEloHeatmapFiltered(from, to, eco)
-  return NextResponse.json(data)
-}
+export const GET = defineGetRoute({
+  revalidate,
+  query: QuerySchema,
+  handler: ({ query }) => {
+    const from = `${query.fromYear}-01` as YyyyMm
+    const to = `${query.toYear}-12` as YyyyMm
+    return getEloHeatmap(from, to, query.eco)
+  },
+})

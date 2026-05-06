@@ -1,4 +1,3 @@
-// app/src/app/changelog/page.tsx
 import changelog from '@/lib/changelog.json'
 import { createMetadata } from '@/lib/metadata'
 
@@ -21,7 +20,7 @@ export default function ChangelogPage() {
       <h1 className="text-2xl font-semibold">Changelog</h1>
       
       <p className="text-sm text-slate-600 dark:text-slate-300">
-        Welcome to the LichessTrends changelog! Here&apos;s where we track all the updates, new features, and fixes. We&apos;re just getting started, but stay tuned for more chess data magic. 🚀
+        Updates, new features, and fixes for LichessTrends.
       </p>
 
       {releases.map((release, index) => (
@@ -38,13 +37,6 @@ export default function ChangelogPage() {
         </section>
       ))}
 
-      {/* Placeholder for future updates */}
-      <section className="space-y-3 border-t border-slate-200 pt-4 dark:border-slate-800 opacity-50">
-        <h2 className="text-lg font-semibold">Coming Soon...</h2>
-        <p className="text-sm text-slate-600 dark:text-slate-300">
-          Exciting updates on the horizon: deeper opening analysis, rating trends, and more interactive features. What would you like to see next? Drop us a note on GitHub!
-        </p>
-      </section>
     </div>
   )
 }

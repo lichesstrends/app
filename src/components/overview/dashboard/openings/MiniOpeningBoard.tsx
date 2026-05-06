@@ -1,50 +1,15 @@
 'use client'
-import { useEffect, useState } from 'react'
-import { Chess } from 'chess.js'
-import { Chessboard } from 'react-chessboard'
 
+import { AnimatedMiniBoard } from '@/components/openings/showcase/AnimatedMiniBoard'
+
+/**
+ * Thin wrapper around AnimatedMiniBoard for the dashboard's top-openings panel.
+ * The board always plays (no hover-to-pause behavior here).
+ */
 export function MiniOpeningBoard({ san }: { san: string }) {
-  const [fen, setFen] = useState(() => new Chess().fen())
-
-  useEffect(() => {
-    const game = new Chess()
-    setFen(game.fen())
-
-    // strip move numbers like "1." "2."
-    const moves = san.replace(/\d+\./g, '').trim().split(/\s+/)
-    let i = 0
-
-    const id = window.setInterval(() => {
-      if (i < moves.length) {
-        try {
-          game.move(moves[i++]!)
-          setFen(game.fen())
-        } catch {
-          i = moves.length // bail out to reset on next tick
-        }
-      } else {
-        game.reset()
-        setFen(game.fen())
-        i = 0
-      }
-    }, 1200)
-
-    return () => window.clearInterval(id)
-  }, [san])
-
   return (
     <div className="h-30 w-30 overflow-hidden rounded">
-      <Chessboard
-        options={{
-          position: fen,           // always a FEN (never "start")
-          showNotation: false,
-          allowDragging: false,
-          allowDrawingArrows: false,  
-          animationDurationInMs: 300,
-          darkSquareStyle: { backgroundColor: "#8ca3ac" },
-          lightSquareStyle: { backgroundColor: "#dfe3e6" }
-        }}
-      />
+      <AnimatedMiniBoard san={san} playing moveIntervalMs={1200} />
     </div>
   )
 }

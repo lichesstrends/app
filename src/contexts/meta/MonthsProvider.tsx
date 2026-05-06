@@ -1,5 +1,5 @@
 'use client'
-import { createContext, useContext } from 'react'
+import { createContext, useContext, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import type { MinMaxMonths } from '@/types'
 
@@ -10,6 +10,8 @@ type MonthsCtx = {
 
 const Ctx = createContext<MonthsCtx | null>(null)
 
+const ONE_DAY_MS = 24 * 60 * 60 * 1000
+
 export function MonthsProvider({ children }: { children: React.ReactNode }) {
   const q = useQuery({
     queryKey: ['meta', 'months'],
@@ -18,11 +20,13 @@ export function MonthsProvider({ children }: { children: React.ReactNode }) {
       if (!r.ok) throw new Error('Failed to load months')
       return (await r.json()) as MinMaxMonths
     },
-    staleTime: Infinity, // never goes stale
-    gcTime: Infinity,    // keep forever
+    staleTime: ONE_DAY_MS,
   })
 
-  const value: MonthsCtx = { months: q.data ?? null, isLoading: q.isLoading }
+  const value = useMemo<MonthsCtx>(
+    () => ({ months: q.data ?? null, isLoading: q.isLoading }),
+    [q.data, q.isLoading],
+  )
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
 

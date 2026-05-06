@@ -1,12 +1,16 @@
 'use client'
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useMemo, useState } from 'react'
 import type { YyyyMm } from '@/types'
+import { lastNMonthsEndingAt } from '@/lib/date'
 import { useMonths } from '@/contexts/meta/MonthsProvider'
 
 export enum OverviewMode {
   Last = 'last',
   Ever = 'ever',
 }
+
+/** How many months "Last" covers, ending at (and including) the latest month. */
+export const LAST_MODE_MONTHS = 12
 
 type Ctx = {
   mode: OverviewMode
@@ -17,7 +21,8 @@ const OverviewCtx = createContext<Ctx | null>(null)
 
 export function OverviewProvider({ children }: { children: React.ReactNode }) {
   const [mode, setMode] = useState<OverviewMode>(OverviewMode.Last)
-  return <OverviewCtx.Provider value={{ mode, setMode }}>{children}</OverviewCtx.Provider>
+  const value = useMemo<Ctx>(() => ({ mode, setMode }), [mode])
+  return <OverviewCtx.Provider value={value}>{children}</OverviewCtx.Provider>
 }
 
 export function useOverview() {
@@ -26,12 +31,13 @@ export function useOverview() {
   return ctx
 }
 
-/** Combine global months + current mode into a concrete {from,to} range. */
+/** Combine global months + current mode into a concrete `{from, to}` range. */
 export function useRangeFromMode(): { from: YyyyMm; to: YyyyMm } | null {
   const { months } = useMonths()
   const { mode } = useOverview()
   if (!months) return null
-  const to = months.maxMonth
-  const from = mode === OverviewMode.Last ? months.maxMonth : months.minMonth
-  return { from, to }
+  if (mode === OverviewMode.Last) {
+    return lastNMonthsEndingAt(months.maxMonth, LAST_MODE_MONTHS)
+  }
+  return { from: months.minMonth, to: months.maxMonth }
 }

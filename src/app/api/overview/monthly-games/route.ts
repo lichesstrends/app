@@ -1,14 +1,11 @@
-import { NextResponse } from 'next/server'
+import { defineGetRoute } from '@/app/api/_lib/handler'
 import { getMonthlyGames } from '@/lib/data'
-import { YyyyMm } from '@/types'
+import { MonthRangeSchema } from '@/lib/validation'
 
-export const revalidate = 600;
+export const revalidate = 600
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url)
-  const from = searchParams.get('from') as YyyyMm
-  const to = searchParams.get('to') as YyyyMm
-  if (!from || !to) return NextResponse.json({ error: 'from & to required' }, { status: 400 })
-  const data = await getMonthlyGames(from, to)
-  return NextResponse.json(data)
-}
+export const GET = defineGetRoute({
+  revalidate,
+  query: MonthRangeSchema,
+  handler: ({ query }) => getMonthlyGames(query.from, query.to),
+})

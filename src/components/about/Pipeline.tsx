@@ -29,12 +29,7 @@ import {
   MoreHorizontal,
 } from 'lucide-react'
 
-// Chess pieces for random animation
 const CHESS_PIECES = ['♟', '♞', '♝', '♜', '♛', '♚', '♙', '♘', '♗', '♖', '♕', '♔']
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Node info content for the sidebar
-// ─────────────────────────────────────────────────────────────────────────────
 
 type NodeInfo = {
   title: string
@@ -215,9 +210,6 @@ const nodeInfoMap: Record<string, NodeInfo> = {
   },
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Custom node component
-// ─────────────────────────────────────────────────────────────────────────────
 
 type PipelineNodeData = {
   label: string
@@ -316,9 +308,6 @@ function PipelineNode({ data, selected }: NodeProps<Node<PipelineNodeData>>) {
   )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Animated edge with smooth flowing chess pieces
-// ─────────────────────────────────────────────────────────────────────────────
 
 function AnimatedChessEdge({
   id,
@@ -412,9 +401,6 @@ function AnimatedChessEdge({
   )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Info Panel Component
-// ─────────────────────────────────────────────────────────────────────────────
 
 const infoPanelTitleColors = {
   amber: 'text-amber-700 dark:text-amber-300',
@@ -452,9 +438,6 @@ function InfoPanel({ nodeId }: { nodeId: string | null }) {
   )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Main Pipeline component
-// ─────────────────────────────────────────────────────────────────────────────
 
 const initialNodes: Node<PipelineNodeData>[] = [
   // Source

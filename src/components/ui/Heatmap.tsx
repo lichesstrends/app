@@ -1,7 +1,8 @@
 'use client'
-import { useMemo, useState } from 'react'
+import { memo, useMemo, useState } from 'react'
 import { useTheme } from 'next-themes'
 import { axisLabelCls } from '@/lib/chartStyles'
+import { inferBucketStep } from '@/lib/buckets'
 import { SegmentedToggle } from '@/components/ui/SegmentedToggle'
 import { TooltipContent } from '@/components/ui/TooltipContent'
 
@@ -47,7 +48,7 @@ export type HeatmapProps = {
   showLegend?: boolean
 }
 
-export function Heatmap({
+function HeatmapImpl({
   data,
   logK = 9,
   mode,
@@ -86,15 +87,7 @@ export function Heatmap({
   const yBuckets = data.buckets.slice().reverse()
 
   // Step for Elo range in tooltips (fallback 200)
-  const step = useMemo(() => {
-    if (data.buckets.length < 2) return 200
-    let best = Number.POSITIVE_INFINITY
-    for (let i = 1; i < data.buckets.length; i++) {
-      const d = data.buckets[i] - data.buckets[i - 1]
-      if (d > 0 && d < best) best = d
-    }
-    return Number.isFinite(best) ? best : 200
-  }, [data.buckets])
+  const step = useMemo(() => inferBucketStep(data.buckets), [data.buckets])
 
   const tDensity = useMemo(() => makeLogTransform(logK), [logK])
 
@@ -272,3 +265,5 @@ export function Heatmap({
     </div>
   )
 }
+
+export const Heatmap = memo(HeatmapImpl)

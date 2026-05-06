@@ -3,27 +3,18 @@ import { ActivityBucketPoint } from '@/types'
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Label } from 'recharts'
 import { useTheme } from 'next-themes'
 import { useMemo } from 'react'
+import { inferBucketStep } from '@/lib/buckets'
 
 export function ActivityDistribution({ points }: { points: ActivityBucketPoint[] }) {
   const { resolvedTheme } = useTheme()
   const isDark = resolvedTheme === 'dark'
 
-  // First, sort buckets only once
   const sorted = useMemo(
     () => points.slice().sort((a, b) => a.bucket - b.bucket),
-    [points]
+    [points],
   )
 
-  // Infer bucket step (fallback 200)
-  const step = useMemo(() => {
-    if (sorted.length < 2) return 200
-    let best = Number.POSITIVE_INFINITY
-    for (let i = 1; i < sorted.length; i++) {
-      const d = sorted[i].bucket - sorted[i - 1].bucket
-      if (d > 0 && d < best) best = d
-    }
-    return Number.isFinite(best) ? best : 200
-  }, [sorted])
+  const step = useMemo(() => inferBucketStep(sorted.map((p) => p.bucket)), [sorted])
 
   // Now compute data with midpoints and pct
   const data = useMemo(
@@ -57,8 +48,8 @@ export function ActivityDistribution({ points }: { points: ActivityBucketPoint[]
             type="number"
             dataKey="mid"
             tick={{ fontSize: 10, fill: axisColor }}
-            ticks={sorted.map((p) => p.bucket)} // 👈 force boundaries (1600, 2000…)
-            domain={[sorted[0].bucket, sorted[sorted.length - 1].bucket + step]} // extend to cover last bucket
+            ticks={sorted.map((p) => p.bucket)}
+            domain={[sorted[0]?.bucket ?? 0, (sorted[sorted.length - 1]?.bucket ?? 0) + step]}
           >
             <Label value="Elo bucket" offset={-6} position="insideBottom" style={{ fill: axisColor, fontSize: 11 }} />
           </XAxis>

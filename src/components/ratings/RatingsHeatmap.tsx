@@ -4,39 +4,9 @@ import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Heatmap, HeatmapMode } from '@/components/ui/Heatmap'
 import { DashboardCard } from '@/components/overview/dashboard/DashboardCard'
+import { YearRangeFilters } from '@/components/ui/YearRangeFilters'
 import type { EloHeatmapResponse } from '@/types'
 import { getAllEcoFamilies, type EcoFamily } from '@/lib/eco'
-
-function YearSelect({
-  value,
-  onChange,
-  min,
-  max,
-  label,
-}: {
-  value: number
-  onChange: (v: number) => void
-  min: number
-  max: number
-  label: string
-}) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-xs text-slate-600 dark:text-slate-300">{label}</span>
-      <select
-        className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-      >
-        {Array.from({ length: max - min + 1 }, (_, i) => min + i).map((y) => (
-          <option key={y} value={y}>
-            {y}
-          </option>
-        ))}
-      </select>
-    </div>
-  )
-}
 
 function OpeningSelect({
   value,
@@ -74,20 +44,24 @@ export function RatingsHeatmap() {
   const [eco, setEco] = useState('')
   const [mode, setMode] = useState<HeatmapMode>('matchup')
 
-  // Load available years
   useEffect(() => {
+    let cancelled = false
     ;(async () => {
       try {
         const r = await fetch('/api/meta/years')
         if (!r.ok) throw new Error('Failed to load years')
         const j: { minYear: number; maxYear: number } = await r.json()
+        if (cancelled) return
         setBounds({ min: j.minYear, max: j.maxYear })
         setFromYear(j.minYear)
         setToYear(j.maxYear)
       } catch (e) {
-        console.error(e)
+        if (!cancelled) console.error(e)
       }
     })()
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   const { data, isPending, error } = useQuery({
@@ -107,15 +81,20 @@ export function RatingsHeatmap() {
   })
 
   const selectedOpening = eco ? families.find((f) => f.range === eco)?.label : null
-
   const title = selectedOpening
     ? `Elo matchup heatmap – ${selectedOpening}`
     : 'Elo matchup heatmap'
 
   const filters = bounds && fromYear !== null && toYear !== null && (
     <div className="flex flex-wrap items-center gap-3">
-      <YearSelect value={fromYear} onChange={setFromYear} min={bounds.min} max={toYear} label="From" />
-      <YearSelect value={toYear} onChange={setToYear} min={fromYear} max={bounds.max} label="to" />
+      <YearRangeFilters
+        fromYear={fromYear}
+        toYear={toYear}
+        minYear={bounds.min}
+        maxYear={bounds.max}
+        onFromChange={setFromYear}
+        onToChange={setToYear}
+      />
       <OpeningSelect value={eco} onChange={setEco} families={families} />
     </div>
   )

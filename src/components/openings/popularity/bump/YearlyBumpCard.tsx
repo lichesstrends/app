@@ -4,12 +4,14 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import type { YearlyBumpResponse } from '@/types'
 import { DashboardCard } from '@/components/overview/dashboard/DashboardCard'
+import { YearRangeFilters } from '@/components/ui/YearRangeFilters'
 import { YearlyBump } from './YearlyBump'
 
 type YearBounds = { minYear: number; maxYear: number }
 
+const ONE_DAY_MS = 24 * 60 * 60 * 1000
+
 export function YearlyBumpCard() {
-  // Fetch available years (cached)
   const yearsQuery = useQuery({
     queryKey: ['meta', 'years'],
     queryFn: async () => {
@@ -17,60 +19,42 @@ export function YearlyBumpCard() {
       if (!r.ok) throw new Error('Failed to load years')
       return (await r.json()) as YearBounds
     },
-    staleTime: Infinity,
-    gcTime: Infinity,
+    staleTime: ONE_DAY_MS,
   })
 
   const bounds = yearsQuery.data
   const [from, setFrom] = useState<number | null>(null)
   const [to, setTo] = useState<number | null>(null)
 
-  // Use bounds as defaults when available
   const effectiveFrom = from ?? bounds?.minYear
   const effectiveTo = to ?? bounds?.maxYear
 
-  // Fetch bump data (cached per range)
   const bumpQuery = useQuery({
     queryKey: ['openings', 'yearly-bump', effectiveFrom, effectiveTo],
     enabled: effectiveFrom != null && effectiveTo != null,
     queryFn: async () => {
-      const r = await fetch(`/api/openings/yearly-bump?top=10&from=${effectiveFrom}&to=${effectiveTo}`)
+      const r = await fetch(
+        `/api/openings/yearly-bump?top=10&from=${effectiveFrom}&to=${effectiveTo}`,
+      )
       if (!r.ok) throw new Error('Failed to load popularity')
       return (await r.json()) as YearlyBumpResponse
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 30 * 60 * 1000,   // 30 minutes
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   })
 
   const right =
-    bounds && (
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-slate-600 dark:text-slate-300">Years</span>
-        <select
-          className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs dark:border-slate-700 dark:bg-slate-900"
-          value={effectiveFrom ?? bounds.minYear}
-          onChange={(e) => setFrom(Number(e.target.value))}
-        >
-          {Array.from({ length: bounds.maxYear - bounds.minYear + 1 }, (_, i) => bounds.minYear + i).map((y) => (
-            <option key={`from-${y}`} value={y}>
-              {y}
-            </option>
-          ))}
-        </select>
-        <span className="text-slate-500">to</span>
-        <select
-          className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs dark:border-slate-700 dark:bg-slate-900"
-          value={effectiveTo ?? bounds.maxYear}
-          onChange={(e) => setTo(Number(e.target.value))}
-        >
-          {Array.from({ length: bounds.maxYear - bounds.minYear + 1 }, (_, i) => bounds.minYear + i).map((y) => (
-            <option key={`to-${y}`} value={y}>
-              {y}
-            </option>
-          ))}
-        </select>
-      </div>
-    )
+    bounds && effectiveFrom != null && effectiveTo != null ? (
+      <YearRangeFilters
+        fromYear={effectiveFrom}
+        toYear={effectiveTo}
+        minYear={bounds.minYear}
+        maxYear={bounds.maxYear}
+        onFromChange={setFrom}
+        onToChange={setTo}
+        fromLabel="Years"
+      />
+    ) : null
 
   const showSkeleton = yearsQuery.isPending || bumpQuery.isPending || !bumpQuery.data
   const showError = yearsQuery.isError || bumpQuery.isError
@@ -82,8 +66,8 @@ export function YearlyBumpCard() {
       right={right}
       info={
         <p className="mb-0 text-xs">
-          Rank per year is computed by total games. A line appears only in years where the opening family is inside the
-          Top-10.
+          Rank per year is computed by total games. A line appears only in years where the opening
+          family is inside the Top-10.
         </p>
       }
       minHeightClassName="min-h-[28rem]"
