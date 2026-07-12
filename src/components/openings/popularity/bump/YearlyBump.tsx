@@ -23,7 +23,7 @@ export function YearlyBump({ data }: { data: YearlyBumpResponse }) {
   }))
 
   return (
-    <div className="h-[420px] w-full">
+    <div className="h-[420px] min-w-[600px]">
       <ResponsiveBump<Datum, Serie>
         data={chartSeries}
         xPadding={0.7}

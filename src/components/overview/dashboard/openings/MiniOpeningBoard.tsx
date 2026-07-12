@@ -2,14 +2,8 @@
 
 import { AnimatedMiniBoard } from '@/components/openings/showcase/AnimatedMiniBoard'
 
-/**
- * Thin wrapper around AnimatedMiniBoard for the dashboard's top-openings panel.
- * The board always plays (no hover-to-pause behavior here).
- */
+/** Dashboard top-openings board; always animating. */
 export function MiniOpeningBoard({ san }: { san: string }) {
-  return (
-    <div className="h-30 w-30 overflow-hidden rounded">
-      <AnimatedMiniBoard san={san} playing moveIntervalMs={1200} />
-    </div>
-  )
+  return <AnimatedMiniBoard san={san} playing moveIntervalMs={1200} />
 }
+

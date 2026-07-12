@@ -45,6 +45,11 @@ export function ApiReference() {
           --scalar-background-3: transparent !important;
           --scalar-sidebar-background: transparent !important;
         }
+
+        /* Prevent Scalar's own sticky header from covering our site navbar */
+        .t-doc__header {
+          z-index: 10 !important;
+        }
       `}</style>
     </>
   )

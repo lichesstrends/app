@@ -16,6 +16,14 @@ const navLinks = [
   { href: '/api', label: 'API' },
 ]
 
+/** Match the current path to a nav link, tolerating trailing slashes and nested routes. */
+function isActive(pathname: string | null, href: string): boolean {
+  if (!pathname) return false
+  const current = pathname.replace(/\/+$/, '') || '/'
+  if (href === '/') return current === '/'
+  return current === href || current.startsWith(`${href}/`)
+}
+
 export function Navbar() {
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -55,7 +63,7 @@ export function Navbar() {
     'dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800'
 
   return (
-    <header className="sticky top-0 z-50 flex w-full justify-center">
+    <header className="sticky top-0 z-[100] flex w-full justify-center select-none">
       <div className="m-4 w-full max-w-6xl">
         <div className="flex items-center justify-between rounded-2xl border border-white/20 bg-white/70 p-3 shadow-md backdrop-blur-md dark:border-slate-800/60 dark:bg-slate-900/60">
           {/* Left: Logo */}
@@ -71,16 +79,16 @@ export function Navbar() {
           </Link>
 
           {/* Center: Desktop Nav */}
-          <nav className="hidden items-center gap-6 md:flex">
+          <nav className="hidden items-center gap-1 md:flex">
             {navLinks.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
                 className={clsx(
-                  'text-sm font-semibold transition-colors',
-                  pathname === href
-                    ? 'text-sky-600 dark:text-sky-400'
-                    : 'text-slate-600 hover:text-sky-600 dark:text-slate-300 dark:hover:text-sky-400'
+                  'rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors',
+                  isActive(pathname, href)
+                    ? 'bg-slate-100 text-sky-600 dark:bg-slate-800 dark:text-sky-400'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100'
                 )}
               >
                 {label}
@@ -122,7 +130,7 @@ export function Navbar() {
           id="mobile-menu"
           ref={menuRef}
           className={clsx(
-            'absolute left-4 right-4 top-[4.25rem] rounded-2xl border border-slate-200 bg-white p-3 shadow-lg dark:border-slate-700 dark:bg-slate-900',
+            'fixed left-4 right-4 top-[4.25rem] z-[9999] rounded-2xl border border-slate-200 bg-white p-3 shadow-lg dark:border-slate-700 dark:bg-slate-900',
             'transition-all duration-150 md:hidden',
             menuOpen
               ? 'pointer-events-auto opacity-100 translate-y-0'
@@ -136,7 +144,7 @@ export function Navbar() {
                 href={href}
                 className={clsx(
                   'rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                  pathname === href
+                  isActive(pathname, href)
                     ? 'bg-slate-100 text-sky-700 dark:bg-slate-800 dark:text-sky-300'
                     : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
                 )}

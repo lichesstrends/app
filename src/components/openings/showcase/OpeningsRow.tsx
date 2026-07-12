@@ -4,17 +4,12 @@ import Marquee from 'react-fast-marquee'
 import type { EcoFamily } from '@/lib/eco'
 import { OpeningCard } from './OpeningCard'
 
-/**
- * One fast, smooth marquee row (react-fast-marquee).
- * - Two rows will use this with opposite directions.
- * - Consistent spacing: each child has a right margin AND we append a spacer.
- *   This guarantees a gap at the loop boundary.
- */
+/** One marquee row of opening cards; two rows scroll in opposite directions. */
 export function OpeningsRow({
   items,
   reverse = false,
-  speed = 16,     // calmer; reduce if you want even slower
-  gap = 16,       // px
+  speed = 16,
+  gap = 16,
   onOpen,
 }: {
   items: EcoFamily[]
@@ -36,7 +31,6 @@ export function OpeningsRow({
           <OpeningCard
             name={f.label}
             range={f.range}
-            san={f.sampleSan}
             onClick={() => onOpen?.(f)}
           />
         </div>

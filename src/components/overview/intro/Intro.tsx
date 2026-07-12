@@ -7,12 +7,11 @@ export default function Intro() {
   return (
     <section className="space-y-3">
       <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-        Welcome to LichessTrends!
+        LichessTrends
       </h2>
 
       <p className="text-[13px] leading-6 text-slate-600 dark:text-slate-300">
-        <strong>LichessTrends</strong> is an open-source project that aggregates the monthly Lichess
-        classical game dumps into nice charts. It&apos;s built on top of{' '}
+        An open-source project that aggregates the monthly{' '}
         <a
           href="https://lichess.org/"
           target="_blank"
@@ -20,10 +19,9 @@ export default function Intro() {
           className="underline underline-offset-4 decoration-slate-300 hover:text-slate-900 dark:hover:text-white"
         >
           Lichess
-        </a>
-        , a free and open-source chess platform with an open-data initiative. Beyond the dashboard,{' '}
-        <strong>LichessTrends</strong> lets you visualize many statistics: opening popularity,
-        win/draw rates, performance by Elo buckets, and evolution over time.
+        </a>{' '}
+        classical game dumps into charts: opening popularity, win and draw rates,
+        performance by Elo bucket, and how they evolve over time.
       </p>
 
       <div className="grid gap-3 sm:grid-cols-3">

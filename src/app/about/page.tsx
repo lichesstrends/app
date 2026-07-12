@@ -1,49 +1,79 @@
-import { Pipeline } from '@/components/about/Pipeline'
 import { createMetadata } from '@/lib/metadata'
 
 export const revalidate = 3600
 
-export const metadata = createMetadata('About', 'Learn how LichessTrends works — from data ingestion to visualization.')
+export const metadata = createMetadata('About', 'Learn how LichessTrends works, from data ingestion to visualization.')
 
-const techStack = [
-  { name: 'Rust', color: 'bg-orange-500/20 text-orange-600 dark:text-orange-400 border-orange-500/30' },
-  { name: 'Next.js', color: 'bg-neutral-500/20 text-neutral-700 dark:text-neutral-300 border-neutral-500/30' },
-  { name: 'React', color: 'bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 border-cyan-500/30' },
-  { name: 'MySQL', color: 'bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30' },
-  { name: 'TanStack Query', color: 'bg-red-500/20 text-red-600 dark:text-red-400 border-red-500/30' },
-  { name: 'Tailwind', color: 'bg-sky-500/20 text-sky-600 dark:text-sky-400 border-sky-500/30' },
-  { name: 'Recharts', color: 'bg-violet-500/20 text-violet-600 dark:text-violet-400 border-violet-500/30' },
-  { name: 'React Flow', color: 'bg-fuchsia-500/20 text-fuchsia-600 dark:text-fuchsia-400 border-fuchsia-500/30' },
-]
+const linkClass =
+  'underline underline-offset-4 decoration-slate-300 hover:text-slate-900 dark:hover:text-white'
 
 export default function AboutPage() {
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)]">
-      {/* Page title with hint */}
-      <div className="flex items-baseline gap-4 mb-4">
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">About</h1>
-        <span className="text-sm text-slate-400 dark:text-slate-500">Click on the pipeline steps for more info</span>
-      </div>
+    <div className="max-w-2xl space-y-8">
+      <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">About</h1>
 
-      {/* Tech Stack - right under title, above flowchart */}
-      <div className="pb-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 mr-2">Built with</span>
-          {techStack.map((tech) => (
-            <span
-              key={tech.name}
-              className={`px-2.5 py-1 text-xs font-medium rounded-full border ${tech.color}`}
-            >
-              {tech.name}
-            </span>
-          ))}
-        </div>
-      </div>
+      <section className="space-y-3">
+        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">The data</h2>
+        <p className="leading-7 text-slate-600 dark:text-slate-300">
+          Every month, Lichess publishes a public dump of all the rated games played on the
+          platform. You can browse these dumps on the{' '}
+          <a href="https://database.lichess.org" target="_blank" rel="noopener noreferrer" className={linkClass}>
+            Lichess database
+          </a>
+          . They are large compressed PGN files, and some months contain well over a hundred
+          million games, each one carrying the players ratings, the moves, timestamps, and the
+          result.
+        </p>
+      </section>
 
-      {/* Main pipeline area - break out of container to full viewport width */}
-      <div className="flex-1 relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden">
-        <Pipeline />
-      </div>
+      <section className="space-y-3">
+        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Aggregation</h2>
+        <p className="leading-7 text-slate-600 dark:text-slate-300">
+          Rather than downloading those files first, the aggregator streams the compressed dumps
+          directly over HTTP and decompresses them on the fly, so it can work through terabytes of
+          data with a small memory footprint. Games are parsed in parallel across CPU cores and
+          grouped by month, opening family, and the rating range of each player. For every one of
+          those combinations it keeps just the totals that matter: how many games were played, and
+          how many ended in a white win, a black win, or a draw. A daily GitHub Actions workflow
+          runs the whole process and picks up any new dump automatically. The code lives in the{' '}
+          <a href="https://github.com/lichesstrends/aggregator" target="_blank" rel="noopener noreferrer" className={linkClass}>
+            aggregator repository
+          </a>
+          .
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Storage and API</h2>
+        <p className="leading-7 text-slate-600 dark:text-slate-300">
+          The aggregated data is tiny compared to the raw dumps: what would be terabytes of PGN
+          becomes a small table where each row is a single combination of month, opening, and
+          rating buckets. A Next.js backend exposes that table through cached REST endpoints
+          covering monthly game counts, opening popularity, rating heatmaps, and more. You can try
+          them from the{' '}
+          <a href="/api" className={linkClass}>
+            API reference
+          </a>
+          .
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">The site</h2>
+        <p className="leading-7 text-slate-600 dark:text-slate-300">
+          This site is built with Next.js and React, using TanStack Query to fetch data and
+          Recharts to draw the charts. The whole project is open source and contributions are
+          welcome on{' '}
+          <a href="https://github.com/lichesstrends/app" target="_blank" rel="noopener noreferrer" className={linkClass}>
+            GitHub
+          </a>
+          .
+        </p>
+        <p className="leading-7 text-slate-600 dark:text-slate-300">
+          LichessTrends is an independent project with no affiliation to Lichess.org. It simply
+          builds on their open-data initiative.
+        </p>
+      </section>
     </div>
   )
 }

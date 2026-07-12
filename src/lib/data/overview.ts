@@ -264,6 +264,10 @@ async function fetchTopOpenings(
   limit: number,
 ): Promise<TopOpeningsResponse> {
   const { from: f, to: t } = await resolveMonthRange(from, to)
+  // `LIMIT` is inlined (not bound) because mysql2's prepared-statement path
+  // sends bound params as strings, producing `LIMIT '3'` and a syntax error.
+  // `limit` is validated as an integer in [1, 50] at the route boundary.
+  const safeLimit = Math.trunc(limit)
   const [rows, trow] = await Promise.all([
     selectRows<RowDataPacket>(
       `SELECT eco_group AS eco, SUM(games) AS g
@@ -271,8 +275,8 @@ async function fetchTopOpenings(
        WHERE month BETWEEN ? AND ?
        GROUP BY eco_group
        ORDER BY g DESC
-       LIMIT ?`,
-      [f, t, limit],
+       LIMIT ${safeLimit}`,
+      [f, t],
     ),
     selectRows<RowDataPacket>(
       `SELECT COALESCE(SUM(games),0) AS total

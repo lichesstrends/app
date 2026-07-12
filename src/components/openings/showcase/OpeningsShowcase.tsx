@@ -103,7 +103,6 @@ export function OpeningsShowcase() {
                   key={f.range}
                   name={f.label}
                   range={f.range}
-                  san={f.sampleSan}
                   onClick={() => onOpen(f)}
                 />
               ))}

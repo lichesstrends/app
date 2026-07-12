@@ -6,8 +6,10 @@
 
 html, body { min-height: 100%; }
 
-/* Prevent horizontal scrollbar from full-bleed elements */
-html { overflow-x: hidden; }
+/* Prevent horizontal scrollbar from full-bleed elements. `clip` (not `hidden`)
+   so the html element doesn't become a scroll container, which would break
+   Next.js scroll-to-top on navigation. */
+html { overflow-x: clip; }
 
 /* Custom scrollbar - minimal style without top/bottom buttons */
 * {

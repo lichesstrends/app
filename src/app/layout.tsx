@@ -4,6 +4,7 @@ import { QueryProvider } from '@/contexts/query/QueryProvider'
 import { MonthsProvider } from '@/contexts/meta/MonthsProvider'
 import { Navbar } from '@/components/nav/NavBar'
 import { Footer } from '@/components/layout/Footer'
+import { ScrollToTop } from '@/components/layout/ScrollToTop'
 import { Atkinson_Hyperlegible } from 'next/font/google'
 import { defaultMetadata } from '@/lib/metadata'
 
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <QueryProvider>
             <MonthsProvider>
               <div className="flex min-h-screen flex-col">
+                <ScrollToTop />
                 <Navbar />
                 <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-16 pt-8">{children}</main>
                 <Footer />

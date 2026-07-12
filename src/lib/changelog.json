@@ -1,13 +1,25 @@
 {
   "releases": [
     {
+      "version": "v0.2.0",
+      "date": "July 12, 2026",
+      "summary": "Performance and interface cleanup across the site.",
+      "changes": [
+        "Fixed the top openings endpoint returning an error.",
+        "Pre-rendered the opening boards as static images so the openings page loads instantly.",
+        "Rewrote the About page as plain, readable text.",
+        "Redesigned the Explore cards and unified card styling across the site.",
+        "Improved responsiveness on mobile."
+      ]
+    },
+    {
       "version": "v0.1.0",
       "date": "October 11, 2025",
-      "summary": "Our initial release! Setting the foundation for exploring Lichess data.",
+      "summary": "Initial release.",
       "changes": [
-        "✨ Added base layout with navigation and footer.",
-        "📊 Launched the overview page with dashboard and explore sections.",
-        "🔧 Set up core components for charts and data visualization."
+        "Added the base layout with navigation and footer.",
+        "Launched the overview page with dashboard and explore sections.",
+        "Set up the core charting and data-visualization components."
       ]
     }
   ]

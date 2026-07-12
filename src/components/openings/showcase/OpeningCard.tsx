@@ -1,39 +1,31 @@
 'use client'
 
 import { memo } from 'react'
+import { Card } from '@/components/ui/Card'
 import { StaticMiniBoard } from './StaticMiniBoard'
 
 export const OpeningCard = memo(function OpeningCard({
   name,
   range,
-  san,
   onClick,
 }: {
   name: string
   range: string
-  san: string
   onClick?: () => void
 }) {
   return (
-    <button
-      type="button"
+    <Card
       onClick={onClick}
-      className="group flex w-full min-w-[220px] items-center rounded-xl border border-slate-200 bg-white p-3 shadow-sm outline-none transition
-                 hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2 focus-visible:ring-sky-400
-                 dark:border-slate-800 dark:bg-slate-950 dark:focus-visible:ring-sky-500"
       title={`${name} (${range})`}
+      className="flex w-full min-w-[220px] cursor-pointer items-center p-3 text-left"
     >
       <div className="flex-shrink-0">
-        <StaticMiniBoard san={san} />
+        <StaticMiniBoard range={range} />
       </div>
 
       <div className="ml-3 min-w-0 text-left">
-        <div
-          className="truncate text-sm font-medium text-slate-800 group-hover:text-sky-700 group-focus:text-sky-700 dark:text-slate-100 dark:group-hover:text-sky-300 dark:group-focus:text-sky-300"
-        >
-          <span className="underline-offset-4 group-hover:underline group-focus:underline">
-            {name}
-          </span>
+        <div className="truncate text-sm font-medium text-slate-800 group-hover:text-sky-700 dark:text-slate-100 dark:group-hover:text-sky-300">
+          <span className="underline-offset-4 group-hover:underline">{name}</span>
         </div>
 
         <div className="mt-1">
@@ -42,6 +34,6 @@ export const OpeningCard = memo(function OpeningCard({
           </span>
         </div>
       </div>
-    </button>
+    </Card>
   )
 })

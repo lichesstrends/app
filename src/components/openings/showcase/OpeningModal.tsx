@@ -133,7 +133,7 @@ export function OpeningModal({
                 type="button"
                 aria-label="Close"
                 onClick={onClose}
-                className="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-slate-300 text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                className="inline-flex h-8 w-8 flex-shrink-0 cursor-pointer items-center justify-center rounded-lg border border-slate-300 text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
               >
                 <X size={16} />
               </button>
