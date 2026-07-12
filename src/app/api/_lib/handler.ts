@@ -26,7 +26,12 @@ const DEFAULT_REVALIDATE = 600
  */
 export function defineGetRoute<S extends ZodTypeAny, R>(opts: RouteOptions<S, R>) {
   const revalidate = opts.revalidate ?? DEFAULT_REVALIDATE
-  const cacheHeader = `public, s-maxage=${revalidate}, stale-while-revalidate=${Math.max(60, revalidate)}`
+  // `max-age=0` forces browsers to always revalidate with the origin/CDN instead
+  // of relying on heuristic freshness (which can otherwise cache a response for
+  // a very long time when there's no explicit max-age). `s-maxage` still lets
+  // shared caches (CDN) serve the response fast for `revalidate` seconds, with
+  // stale-while-revalidate refreshing it in the background.
+  const cacheHeader = `public, max-age=0, s-maxage=${revalidate}, stale-while-revalidate=${Math.max(60, revalidate)}`
 
   return async (req: Request): Promise<NextResponse> => {
     let query: z.infer<S>

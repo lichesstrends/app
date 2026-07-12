@@ -1,6 +1,19 @@
 {
   "releases": [
     {
+      "version": "v0.2.1",
+      "date": "July 13, 2026",
+      "summary": "Navbar, API docs, and popularity chart fixes.",
+      "changes": [
+        "Fixed the mobile navigation menu appearing behind the API reference panel.",
+        "Removed the Sources page and merged its content into the About page.",
+        "The opening popularity chart now scrolls horizontally on small screens, with wider spacing between years.",
+        "Fixed a scrollbar flicker when hovering points in the opening popularity chart.",
+        "API responses are no longer cached too aggressively by the browser.",
+        "The Learn more and API cards now navigate in the same tab, with an external-link icon on links that open a new tab."
+      ]
+    },
+    {
       "version": "v0.2.0",
       "date": "July 12, 2026",
       "summary": "Performance and interface cleanup across the site.",

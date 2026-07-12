@@ -22,8 +22,16 @@ export function YearlyBump({ data }: { data: YearlyBumpResponse }) {
     data: s.data.map((d) => ({ ...d, name: s.label })),
   }))
 
+  // Give each year column a comfortable minimum width so the chart doesn't
+  // feel cramped when scrolled horizontally, but only below the md
+  // breakpoint - on desktop it should just fill the available width.
+  const minWidth = Math.max(600, data.years.length * 90)
+
   return (
-    <div className="h-[420px] min-w-[600px]">
+    <div
+      className="h-[420px] max-md:[min-width:var(--chart-min-w)]"
+      style={{ '--chart-min-w': `${minWidth}px` } as React.CSSProperties}
+    >
       <ResponsiveBump<Datum, Serie>
         data={chartSeries}
         xPadding={0.7}

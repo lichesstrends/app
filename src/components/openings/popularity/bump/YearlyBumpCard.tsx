@@ -77,7 +77,7 @@ export function YearlyBumpCard() {
       ) : showSkeleton ? (
         <div className="h-[420px] w-full animate-pulse rounded-xl bg-slate-200/40 dark:bg-slate-800/40" />
       ) : (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-y-hidden">
           <YearlyBump data={bumpQuery.data} />
         </div>
       )}

@@ -27,7 +27,6 @@ export default function Intro() {
       <div className="grid gap-3 sm:grid-cols-3">
         <CardLink
           href="/about"
-          newTab
           icon={<BookOpen size={16} />}
           title="Learn more"
           body="Discover how the aggregation pipeline works, and how the app was built."
@@ -41,7 +40,6 @@ export default function Intro() {
         />
         <CardLink
           href="/api"
-          newTab
           icon={<Plug size={16} />}
           title="API"
           body="Access the API documentation."
